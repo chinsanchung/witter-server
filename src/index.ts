@@ -1,3 +1,4 @@
-import app from "./App";
+import App from './app';
 
-app.listen(3000, () => console.log("test"));
+const app = new App();
+app.initialize();
