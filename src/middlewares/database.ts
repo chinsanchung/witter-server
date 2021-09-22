@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Debugger from './utils/debugger';
+import Debugger from '../utils/debugger';
 
 export default class Database {
   public static init = async (mongoUri: string): Promise<boolean> => {
