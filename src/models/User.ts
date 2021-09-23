@@ -7,6 +7,8 @@ interface User {
   id: string; // @ 로 시작하는 아이디
   join_date: Date;
   country: string;
+  follower: string[];
+  following: string[];
 }
 
 const schema = new Schema<User>({
@@ -15,6 +17,8 @@ const schema = new Schema<User>({
   name: { type: String, required: true },
   join_date: { type: Date, required: true },
   country: { type: String, required: true },
+  follower: { type: [String], default: [] },
+  following: { type: [String], default: [] },
 });
 
 const UserModel = model<User>('users', schema);
