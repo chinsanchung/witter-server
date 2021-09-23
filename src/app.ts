@@ -46,17 +46,17 @@ export default class App extends Error {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: false }));
     this.app.use(cookieParser(process.env.COOKIE_SECRET));
-    // this.app.use(
-    //   session({
-    //     resave: false,
-    //     saveUninitialized: false,
-    //     secret: process.env.COOKIE_SECRET,
-    //     cookie: { httpOnly: true, secure: false },
-    //     // store: new this.RedisStore({ client: this.redisClient }),
-    //   })
-    // );
-    // this.app.use(passport.initialize());
-    // this.app.use(passport.session());
+    this.app.use(
+      session({
+        resave: false,
+        saveUninitialized: false,
+        secret: process.env.COOKIE_SECRET,
+        cookie: { httpOnly: true, secure: false },
+        // store: new this.RedisStore({ client: this.redisClient }),
+      })
+    );
+    this.app.use(passport.initialize());
+    this.app.use(passport.session());
   };
 
   private setRoutes = (): void => {

@@ -11,7 +11,7 @@ const setDefaultConfig = (): void => {
     done(null, user.id);
   });
   passport.deserializeUser((id: IUser['id'], done) => {
-    UserModel.findOne({ where: { id } })
+    UserModel.findOne({ id })
       .then((user: IUser) => done(null, user))
       .catch((err) => done(err));
   });
@@ -26,7 +26,9 @@ const setLocalStrategy = (): void => {
       },
       async (email: string, password: string, done) => {
         try {
-          const user: IUser = await UserModel.findOne({ where: { email } });
+          const user: IUser = await UserModel.findOne({ email });
+          // Debugger.log('로컬 - ', email, password);
+          // Debugger.log('로컬 = 유저 ', user);
           if (user) {
             const isCorrectPassword = await bcrypt.compare(
               password,
