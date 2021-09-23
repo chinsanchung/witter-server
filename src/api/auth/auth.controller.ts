@@ -14,14 +14,15 @@ export default class AuthController {
   };
 
   join = async (req: Request, res: Response) => {
-    const { email, password, name, id, country }: JoinDto = req.body;
+    const { email, password, name, user_id, country }: JoinDto = req.body;
+    // Debugger.log(req.body);
     try {
       const newPassword: string = this.convertPassword(password);
       await this.authService.join({
         email,
         password: newPassword,
         name,
-        id,
+        user_id,
         country,
         join_date: new Date(),
       });

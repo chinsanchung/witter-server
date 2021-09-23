@@ -8,10 +8,10 @@ const LocalStrategy = passportLocal.Strategy;
 
 const setDefaultConfig = (): void => {
   passport.serializeUser((user: IUser, done) => {
-    done(null, user.id);
+    done(null, user.user_id);
   });
-  passport.deserializeUser((id: IUser['id'], done) => {
-    UserModel.findOne({ id })
+  passport.deserializeUser((user_id: IUser['user_id'], done) => {
+    UserModel.findOne({ user_id })
       .then((user: IUser) => done(null, user))
       .catch((err) => done(err));
   });
