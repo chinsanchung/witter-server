@@ -1,8 +1,8 @@
 import passport from 'passport';
 import passportLocal from 'passport-local';
 import bcrypt from 'bcrypt';
-import { UserModel, IUser } from 'src/models/User';
-import Debugger from 'src/utils/debugger';
+import { UserModel, IUser } from '../models/User';
+import Debugger from '../utils/debugger';
 
 const LocalStrategy = passportLocal.Strategy;
 
