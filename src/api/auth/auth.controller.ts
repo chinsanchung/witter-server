@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import passport from 'passport';
-import { IAuthService, JoinDto } from './auth.dto';
+import { IAuthService, JoinDto } from './auth.interface';
 import Debugger from '../../utils/debugger';
 import { IUser } from '../../models/User';
 

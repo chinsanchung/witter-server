@@ -1,7 +1,7 @@
 import createError from 'http-errors';
 import { UserModel, IUser } from '../../models/User';
 import Debugger from '../../utils/debugger';
-import { JoinDto, IAuthService } from './auth.dto';
+import { JoinDto, IAuthService } from './auth.interface';
 
 export default class AuthService implements IAuthService {
   join = async (user: JoinDto): Promise<IUser> => {

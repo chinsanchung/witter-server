@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ITweetService, CreateDto } from './tweet.dto';
+import { ITweetService, CreateDto } from './tweet.interface';
 import Debugger from '../../utils/debugger';
 import { ITweet } from '../../models/Tweet';
 import { IUser } from '../../models/User';
