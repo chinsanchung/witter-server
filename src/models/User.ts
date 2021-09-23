@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
+import { mediaSchema, IMedia } from './mediaSchema';
 
 interface User {
   email: string; // 로그인 계정
@@ -9,6 +10,9 @@ interface User {
   country: string;
   follower: string[];
   following: string[];
+  header: IMedia | null;
+  photo: IMedia | null;
+  description: string;
 }
 
 const schema = new Schema<User>({
@@ -19,6 +23,9 @@ const schema = new Schema<User>({
   country: { type: String, required: true },
   follower: { type: [String], default: [] },
   following: { type: [String], default: [] },
+  header: { type: mediaSchema, default: null },
+  photo: { type: mediaSchema, default: null },
+  description: { type: String, default: '' },
 });
 
 const UserModel = model<User>('users', schema);
