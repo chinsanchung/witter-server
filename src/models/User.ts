@@ -13,6 +13,7 @@ interface User {
   header: IMedia | null;
   photo: IMedia | null;
   description: string;
+  lock_status: 'all' | 'private';
 }
 
 const schema = new Schema<User>({
@@ -26,6 +27,7 @@ const schema = new Schema<User>({
   header: { type: mediaSchema, default: null },
   photo: { type: mediaSchema, default: null },
   description: { type: String, default: '' },
+  lock_status: { type: String, enum: ['all', 'private'], default: 'all' },
 });
 
 const UserModel = model<User>('users', schema);
