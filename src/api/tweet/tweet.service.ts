@@ -1,4 +1,4 @@
-import createError from 'http-errors';
+import createError from '../../utils/createError';
 import { TweetModel, ITweet } from '../../models/Tweet';
 import Debugger from '../../utils/debugger';
 import { CreateDto, ITweetService } from './tweet.dto';

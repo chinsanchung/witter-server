@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import createError from '../utils/createError';
 import Debugger from '../utils/debugger';
 
 export default class Database {
@@ -9,7 +10,7 @@ export default class Database {
       return true;
     } catch (error) {
       Debugger.error(error);
-      throw new Error('mongoDB 연결에 에러가 발생했습니다.');
+      throw createError(400, 'mongoDB 연결에 에러가 발생했습니다.');
     }
   };
 }

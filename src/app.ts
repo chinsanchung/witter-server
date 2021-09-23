@@ -3,6 +3,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
+import createError from './utils/createError';
 // import redis from 'redis';
 // import connectRedis from 'connect-redis';
 import passport from 'passport';
@@ -13,13 +14,12 @@ import routesList from './routes';
 
 dotenv.config();
 
-export default class App extends Error {
+export default class App {
   private app: express.Application;
   // private RedisStore: connectRedis.RedisStore;
   // private redisClient: redis.RedisClient;
 
   constructor() {
-    super();
     this.app = express();
     PassportConfig();
     // this.RedisStore = connectRedis(session);
@@ -73,9 +73,9 @@ export default class App extends Error {
 
         this.app.listen(3000, () => Debugger.log('포트 3000. 서버 시작'));
       })
-      .catch((error: Error) => {
+      .catch((error) => {
         Debugger.error(error);
-        throw new Error(error.message);
+        throw createError(error.status, error.message);
       });
   };
 }
