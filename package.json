@@ -12,6 +12,7 @@
     "start": "cross-env NODE_ENV=production DEBUG=server node ./dist/index.js"
   },
   "dependencies": {
+    "aws-sdk": "^2.994.0",
     "bcrypt": "^5.0.1",
     "connect-redis": "^6.0.0",
     "cookie-parser": "^1.4.5",
@@ -22,6 +23,8 @@
     "http-errors": "^1.8.0",
     "mongoose": "^6.0.7",
     "morgan": "^1.10.0",
+    "multer": "^1.4.3",
+    "multer-s3": "^2.9.0",
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
     "redis": "^3.1.2"
@@ -36,6 +39,8 @@
     "@types/http-errors": "^1.8.1",
     "@types/jest": "^27.0.1",
     "@types/morgan": "^1.9.3",
+    "@types/multer": "^1.4.7",
+    "@types/multer-s3": "^2.7.10",
     "@types/node": "^16.9.2",
     "@types/passport": "^1.0.7",
     "@types/passport-local": "^1.0.34",
