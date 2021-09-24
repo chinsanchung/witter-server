@@ -4,7 +4,8 @@ import { mediaSchema, IMedia } from './mediaSchema';
 interface ITweet {
   tweet_id: number;
   writer_id: string; // 작성자의 id
-  media: IMedia; // 이미지, 동영상, gif
+  image: IMedia[];
+  video: IMedia;
   contents: string; // 문장
   create_date: Date;
   retweet: string[]; // 리트윗한 사용자의 id 목록
@@ -16,7 +17,8 @@ interface ITweet {
 const schema = new Schema<ITweet>({
   tweet_id: { type: Number, required: true },
   writer_id: { type: String, ref: 'users', required: true },
-  media: { type: mediaSchema, default: null },
+  image: { type: [mediaSchema], default: null },
+  video: { type: mediaSchema, default: null },
   contents: { type: String, default: '' },
   create_date: { type: Date, required: true },
   retweet: { type: [String], ref: 'users', default: [] },
