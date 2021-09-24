@@ -10,4 +10,6 @@ router.post('/create', isLoggedIn, controller.createTweet);
 
 router.patch('/delete', controller.deleteTweet);
 
+router.patch('/tweet-action', isLoggedIn, controller.doTweetAction);
+
 export default router;

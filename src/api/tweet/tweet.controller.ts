@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ITweetService, CreateDto } from './tweet.interface';
+import { ITweetService, ICreateDto } from './tweet.interface';
 import Debugger from '../../utils/debugger';
 import { ITweet } from '../../models/Tweet';
 import { IUser } from '../../models/User';
@@ -11,9 +11,9 @@ export default class TweetController {
     // @ts-ignore
     const user_id: IUser['user_id'] = req.user?.user_id;
     // Debugger.log('body', req.body);
-    const { tweet_id, contents, comments }: CreateDto = req.body;
+    const { tweet_id, contents, comments }: ICreateDto = req.body;
 
-    const query: CreateDto = {
+    const query: ICreateDto = {
       tweet_id,
       writer_id: user_id,
       contents,
@@ -39,7 +39,7 @@ export default class TweetController {
       await this.tweetService.createTweet(query);
       return res.send('success');
     } catch (error) {
-      Debugger.error(error.status);
+      Debugger.error(error.message);
       return res.status(error.status).send(error.message);
     }
   };
@@ -49,7 +49,25 @@ export default class TweetController {
       await this.tweetService.deleteTweet(tweet_id);
       return res.send('delete success');
     } catch (error) {
-      Debugger.error(error.status);
+      Debugger.error(error.message);
+      return res.status(error.status).send(error.message);
+    }
+  };
+  doTweetAction = async (req: Request, res: Response) => {
+    const { tweet_id, action_type, action } = req.body;
+    // @ts-ignore
+    const user_id: IUser['user_id'] = req.user?.user_id;
+    // const user_id = 'testID';
+    try {
+      await this.tweetService.doTweetAction({
+        tweet_id,
+        user_id,
+        action_type,
+        action,
+      });
+      return res.send('tweet action success');
+    } catch (error) {
+      Debugger.error(error);
       return res.status(error.status).send(error.message);
     }
   };
