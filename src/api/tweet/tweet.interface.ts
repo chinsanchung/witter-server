@@ -8,7 +8,7 @@ export interface ICreateDto {
   video?: IMedia;
   readonly contents: string; // 문장
   readonly create_date: Date;
-  readonly comments: number[]; // 해당 트윗에 답글 트윗을 단 tweet_id 목록
+  readonly comments?: number[]; // 해당 트윗에 답글 트윗을 단 tweet_id 목록
 }
 
 export interface ITweetActionDto {
@@ -16,6 +16,11 @@ export interface ITweetActionDto {
   readonly user_id: string;
   readonly action_type: 'retweet' | 'like';
   readonly action: 'do' | 'undo';
+}
+
+export interface ICommentDto {
+  tweet: ICreateDto;
+  target_tweet_id: number;
 }
 
 export interface ITweetService {
@@ -27,8 +32,9 @@ export interface ITweetService {
     action_type,
     action,
   }: ITweetActionDto): Promise<void>;
-  // reTweet({ tweet_id, user_id, action }: ITweetActionDto): Promise<void>;
-  // likeTweet({ tweet_id, user_id, action }: ITweetActionDto): Promise<void>;
-  // 마음에 들어요 doLike
-  // unDoLike
+  addCommentTweet({ tweet, target_tweet_id }: ICommentDto): Promise<ITweet>;
+  deleteCommentTweet(
+    orig_tweet_id: number,
+    comment_tweet_id: number
+  ): Promise<void>;
 }

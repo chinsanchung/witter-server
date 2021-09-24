@@ -1,18 +1,13 @@
 import { Request, Response } from 'express';
-import { ITweetService, ICreateDto } from './tweet.interface';
+import { ITweetService, ICreateDto, ICommentDto } from './tweet.interface';
 import Debugger from '../../utils/debugger';
 import { ITweet } from '../../models/Tweet';
 import { IUser } from '../../models/User';
 
 export default class TweetController {
   constructor(private tweetService: ITweetService) {}
-
-  createTweet = async (req: Request, res: Response) => {
-    // @ts-ignore
-    const user_id: IUser['user_id'] = req.user?.user_id;
-    // Debugger.log('body', req.body);
-    const { tweet_id, contents, comments }: ICreateDto = req.body;
-
+  private createQuery = (req: Request, user_id: string): ICreateDto => {
+    const { tweet_id, contents, comments } = req.body;
     const query: ICreateDto = {
       tweet_id,
       writer_id: user_id,
@@ -34,10 +29,19 @@ export default class TweetController {
       //@ts-ignore
       query.video = { key: req.file.key, url: req.file.location };
     }
+    return query;
+  };
+  createTweet = async (req: Request, res: Response) => {
+    // @ts-ignore
+    const user_id: IUser['user_id'] = req.user?.user_id;
+    // const user_id = 'testID';
+    // Debugger.log('body', req.body);
+
+    const query = this.createQuery(req, user_id);
 
     try {
-      await this.tweetService.createTweet(query);
-      return res.send('success');
+      const newTweet = await this.tweetService.createTweet(query);
+      return res.json(newTweet);
     } catch (error) {
       Debugger.error(error.message);
       return res.status(error.status).send(error.message);
@@ -68,6 +72,37 @@ export default class TweetController {
       return res.send('tweet action success');
     } catch (error) {
       Debugger.error(error);
+      return res.status(error.status).send(error.message);
+    }
+  };
+  addCommentTweet = async (req: Request, res: Response) => {
+    // @ts-ignore
+    const user_id: IUser['user_id'] = req.user?.user_id;
+    // const user_id = 'testID';
+    // Debugger.log('body', req.body);
+    const { target_tweet_id } = req.body;
+    const query = this.createQuery(req, user_id);
+    try {
+      const newCommentTweet = await this.tweetService.addCommentTweet({
+        tweet: query,
+        target_tweet_id,
+      });
+      return res.json(newCommentTweet);
+    } catch (error) {
+      Debugger.error(error.message);
+      return res.status(error.status).send(error.message);
+    }
+  };
+  deleteCommentTweet = async (req: Request, res: Response) => {
+    const { orig_tweet_id, comment_tweet_id } = req.body;
+
+    try {
+      await this.tweetService.deleteCommentTweet(
+        orig_tweet_id,
+        comment_tweet_id
+      );
+      return res.send('delete comment_tweet');
+    } catch (error) {
       return res.status(error.status).send(error.message);
     }
   };
