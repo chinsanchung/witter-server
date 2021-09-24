@@ -22,3 +22,12 @@
 - User 모델의 스키마에 description(자기소개), header(헤더), photo(프로필 사진), lock_status(공개 여부) 를 추가했습니다.
 - 트윗 생성하기와 is_active 를 false 로 바꿔 트윗을 삭제하는 기능을 작성했습니다.
 - 지금까지의 api 에러 처리를 [http-errors](https://www.npmjs.com/package/http-errors) 패키지로 처리하도록 변경했습니다.
+
+### 09/24
+
+- Tweet 모델에서 미디어를 이미지와 비디오로 분리했습니다. 이미지는 최대 4개인 배열, 비디오는 하나만 올릴 수 있습니다.
+  - 그에 따라 컨트롤러와 서비스의 createTweet 메소드를 수정했습니다.
+- 파일을 AWS S3 로 업로드하는 multer, multer-s3, aws-sdk 를 설치하고, 업로드 미들웨어를 작성했습니다.
+- 리트윗, 마음에 들어요 기능을 doTweetAction 메소드로 수행하도록 작성했습니다. 답글 달기와 삭제 기능을 작성했습니다.
+- 리트윗, 마음에 들어요, 답글 달기 기능을 수행하기 전에 트윗이 존재하는지 또는 삭제하지 않았는지를 확인하는 checkTweetExistence 메소드를 추가했습니다.
+- 사용자가 작성한 트윗, 답글을 작성 순으로 저장하는 tweet_list, 마음에 들어요를 저장하는 like_list 를 가진 timeline 스키마와 모델을 작성했습니다.
