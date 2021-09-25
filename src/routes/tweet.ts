@@ -10,7 +10,13 @@ router.post('/create', isLoggedIn, controller.createTweet);
 router.post('/add-comment', isLoggedIn, controller.addCommentTweet);
 
 router.patch('/delete', isLoggedIn, controller.deleteTweet);
-router.patch('/tweet-action', isLoggedIn, controller.doTweetAction);
+
+router.patch('/do-retweet', isLoggedIn, controller.doRetweet);
+router.patch('/undo-retweet', isLoggedIn, controller.unDoRetweet);
+
+router.patch('/do-like', isLoggedIn, controller.doLike);
+router.patch('/undo-retweet', isLoggedIn, controller.unDoLike);
+
 router.patch('/delete-comment', isLoggedIn, controller.deleteCommentTweet);
 
 export default router;

@@ -14,8 +14,6 @@ export interface ICreateDto {
 export interface ITweetActionDto {
   readonly tweet_id: number;
   readonly user_id: string;
-  readonly action_type: 'retweet' | 'like';
-  readonly action: 'do' | 'undo';
 }
 
 export interface ICommentDto {
@@ -26,15 +24,16 @@ export interface ICommentDto {
 export interface ITweetService {
   createTweet(tweet: ICreateDto): Promise<ITweet>;
   deleteTweet(tweet_id: number): Promise<void>;
-  doTweetAction({
-    tweet_id,
-    user_id,
-    action_type,
-    action,
-  }: ITweetActionDto): Promise<void>;
+
+  doRetweet({ tweet_id, user_id }: ITweetActionDto): Promise<void>;
+  unDoRetweet({ tweet_id, user_id }: ITweetActionDto): Promise<void>;
+  doLike({ tweet_id, user_id }: ITweetActionDto): Promise<void>;
+  unDoLike({ tweet_id, user_id }: ITweetActionDto): Promise<void>;
+
   addCommentTweet({ tweet, target_tweet_id }: ICommentDto): Promise<ITweet>;
   deleteCommentTweet(
     orig_tweet_id: number,
-    comment_tweet_id: number
+    comment_tweet_id: number,
+    comment_writer_id: string
   ): Promise<void>;
 }
