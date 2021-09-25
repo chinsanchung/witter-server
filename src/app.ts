@@ -16,6 +16,7 @@ dotenv.config();
 
 export default class App {
   private app: express.Application;
+  private PORT: number = 5000;
   // private RedisStore: connectRedis.RedisStore;
   // private redisClient: redis.RedisClient;
 
@@ -71,7 +72,9 @@ export default class App {
         this.setApplication();
         this.setRoutes();
 
-        this.app.listen(3000, () => Debugger.log('포트 3000. 서버 시작'));
+        this.app.listen(this.PORT, () =>
+          Debugger.log(`포트 ${this.PORT}. 서버 시작`)
+        );
       })
       .catch((error) => {
         Debugger.error(error);
