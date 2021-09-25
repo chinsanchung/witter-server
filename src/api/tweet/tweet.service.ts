@@ -32,7 +32,8 @@ export default class TweetService implements ITweetService {
     try {
       await TimeLineModel.updateOne(
         { user_id },
-        { $push: { [`${target_list}`]: tweet_id } }
+        { $push: { [`${target_list}`]: tweet_id } },
+        { $upsert: true }
       );
       return;
     } catch (error) {
@@ -47,7 +48,8 @@ export default class TweetService implements ITweetService {
     try {
       await TimeLineModel.updateOne(
         { user_id },
-        { $pull: { [`${target_list}`]: tweet_id } }
+        { $pull: { [`${target_list}`]: tweet_id } },
+        { $upsert: true }
       );
       return;
     } catch (error) {
@@ -169,10 +171,7 @@ export default class TweetService implements ITweetService {
         throw createError(404, '존재하지 않는 트윗입니다.');
       } else {
         Debugger.log('마음에 들어요 취소하기 시작');
-        await TweetModel.updateOne(
-          { tweet_id },
-          { $pull: { retweet: user_id } }
-        );
+        await TweetModel.updateOne({ tweet_id }, { $pull: { like: user_id } });
         await this.deleteTweetFromTimeLine({
           user_id,
           tweet_id,

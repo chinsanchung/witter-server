@@ -15,7 +15,7 @@ router.patch('/do-retweet', isLoggedIn, controller.doRetweet);
 router.patch('/undo-retweet', isLoggedIn, controller.unDoRetweet);
 
 router.patch('/do-like', isLoggedIn, controller.doLike);
-router.patch('/undo-retweet', isLoggedIn, controller.unDoLike);
+router.patch('/undo-like', isLoggedIn, controller.unDoLike);
 
 router.patch('/delete-comment', isLoggedIn, controller.deleteCommentTweet);
 
