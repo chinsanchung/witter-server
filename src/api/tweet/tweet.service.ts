@@ -63,7 +63,7 @@ export default class TweetService implements ITweetService {
       const newTweet = await TweetModel.create(tweet);
       Debugger.log('새 트윗', newTweet);
       await this.addTweetToTimeLine({
-        user_id: newTweet.writer_id,
+        user_id: newTweet.user_id,
         tweet_id: newTweet.tweet_id,
         target_list: 'tweet_list',
       });
@@ -84,7 +84,7 @@ export default class TweetService implements ITweetService {
         // TODO: 이미지나 동영상 삭제 기능 추가하기
 
         await this.deleteTweetFromTimeLine({
-          user_id: response.writer_id,
+          user_id: response.user_id,
           tweet_id,
           target_list: 'tweet_list',
         });
@@ -198,7 +198,7 @@ export default class TweetService implements ITweetService {
           { $push: { comments: tweet.tweet_id } }
         );
         await this.addTweetToTimeLine({
-          user_id: tweet.writer_id,
+          user_id: tweet.user_id,
           tweet_id: tweet.tweet_id,
           target_list: 'tweet_list',
         });

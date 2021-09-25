@@ -3,7 +3,7 @@ import { mediaSchema, IMedia } from './mediaSchema';
 
 interface ITweet {
   tweet_id: number;
-  writer_id: string; // 작성자의 id
+  user_id: string; // 작성자의 id
   image: IMedia[];
   video: IMedia;
   contents: string; // 문장
@@ -16,7 +16,7 @@ interface ITweet {
 
 const schema = new Schema<ITweet>({
   tweet_id: { type: Number, required: true },
-  writer_id: { type: String, ref: 'users', required: true },
+  user_id: { type: String, ref: 'users', required: true },
   image: { type: [mediaSchema], default: null },
   video: { type: mediaSchema, default: null },
   contents: { type: String, default: '' },

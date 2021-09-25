@@ -10,7 +10,7 @@ export default class TweetController {
     const { tweet_id, contents, comments } = req.body;
     const query: ICreateDto = {
       tweet_id,
-      writer_id: user_id,
+      user_id: user_id,
       contents,
       create_date: new Date(),
       comments,

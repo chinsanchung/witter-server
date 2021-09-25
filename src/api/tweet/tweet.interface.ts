@@ -3,7 +3,7 @@ import { ITweet } from '../../models/Tweet';
 
 export interface ICreateDto {
   readonly tweet_id: number;
-  readonly writer_id: string; // 작성자의 id
+  readonly user_id: string; // 작성자의 id
   image?: IMedia[];
   video?: IMedia;
   readonly contents: string; // 문장
