@@ -12,6 +12,7 @@ import {
 interface ITweetWithTimeLineParameter {
   user_id: string;
   tweet_id: number;
+  is_retweet?: boolean;
   target_list: 'tweet_list' | 'like_list';
 }
 
@@ -27,12 +28,21 @@ export default class TweetService implements ITweetService {
   private addTweetToTimeLine = async ({
     user_id,
     tweet_id,
+    is_retweet,
     target_list,
   }: ITweetWithTimeLineParameter): Promise<void> => {
     try {
       await TimeLineModel.updateOne(
         { user_id },
-        { $push: { [`${target_list}`]: tweet_id } },
+        {
+          $push: {
+            [`${target_list}`]: {
+              tweet_id,
+              is_retweet,
+              register_date: new Date(),
+            },
+          },
+        },
         { $upsert: true }
       );
       return;
@@ -48,7 +58,7 @@ export default class TweetService implements ITweetService {
     try {
       await TimeLineModel.updateOne(
         { user_id },
-        { $pull: { [`${target_list}`]: tweet_id } },
+        { $pull: { [`${target_list}`]: { tweet_id } } },
         { $upsert: true }
       );
       return;
@@ -65,6 +75,7 @@ export default class TweetService implements ITweetService {
       await this.addTweetToTimeLine({
         user_id: newTweet.user_id,
         tweet_id: newTweet.tweet_id,
+        is_retweet: false,
         target_list: 'tweet_list',
       });
       return newTweet;
@@ -111,6 +122,7 @@ export default class TweetService implements ITweetService {
         await this.addTweetToTimeLine({
           user_id,
           tweet_id,
+          is_retweet: true,
           target_list: 'tweet_list',
         });
         return;
@@ -156,6 +168,7 @@ export default class TweetService implements ITweetService {
         await this.addTweetToTimeLine({
           user_id,
           tweet_id,
+          is_retweet: false,
           target_list: 'like_list',
         });
         return;
@@ -200,6 +213,7 @@ export default class TweetService implements ITweetService {
         await this.addTweetToTimeLine({
           user_id: tweet.user_id,
           tweet_id: tweet.tweet_id,
+          is_retweet: false,
           target_list: 'tweet_list',
         });
         return newTweet;
