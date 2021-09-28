@@ -39,19 +39,22 @@ export default class AuthController {
       (authError, user: IUser, info: { message: string }) => {
         if (authError) {
           Debugger.error('로그인 인증 에러', authError);
+          res.clearCookie('connect.sid');
           return res.status(403).send('로그인 인증에 에러가 발생했습니다.');
         }
         if (!user) {
           Debugger.log('info: ', info);
+          res.clearCookie('connect.sid');
           return res.status(403).send(info.message);
         }
         return req.login(user, (loginError) => {
           if (loginError) {
             Debugger.error('로그인 에러', loginError);
+            res.clearCookie('connect.sid');
             return next(loginError);
           } else {
             Debugger.log('로그인 성공');
-            return res.send('login success');
+            return res.json(user);
           }
         });
       }
@@ -59,8 +62,14 @@ export default class AuthController {
   };
   logout = (req: Request, res: Response) => {
     req.logout();
-    // req.session.destroy();
-    Debugger.log('로그아웃');
-    return res.send('logout success');
+    req.session.destroy(() => {
+      Debugger.log('로그아웃');
+      res.clearCookie('connect.sid');
+      return res.send('logout success');
+    });
+  };
+  tokenRefresh = (req: Request, res: Response) => {
+    Debugger.log('토큰 로그인 갱신하기', req?.user);
+    return res.json(req.user);
   };
 }

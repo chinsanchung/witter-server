@@ -9,5 +9,6 @@ const router = express.Router();
 router.get('/logout', isLoggedIn, controller.logout);
 router.post('/join', controller.join);
 router.post('/login', controller.login);
+router.post('/token-refresh', isLoggedIn, controller.tokenRefresh);
 
 export default router;
