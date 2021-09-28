@@ -23,6 +23,7 @@ const setLocalStrategy = (): void => {
       {
         usernameField: 'email',
         passwordField: 'password',
+        session: true,
       },
       async (email: string, password: string, done) => {
         try {
