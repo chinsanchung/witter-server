@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import createError from './utils/createError';
+import cors from 'cors';
 // import redis from 'redis';
 // import connectRedis from 'connect-redis';
 import passport from 'passport';
@@ -43,6 +44,19 @@ export default class App {
           morgan('dev')(req, res, next);
         }
       }
+    );
+    this.app.use(
+      cors({
+        origin: [
+          'http://localhost:3000',
+          'http://localhost:5000',
+          'http://localhost:8080',
+        ],
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        preflightContinue: false,
+        optionsSuccessStatus: 204,
+        credentials: true,
+      })
     );
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: false }));
