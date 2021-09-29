@@ -5,6 +5,7 @@ import Debugger from '../../utils/debugger';
 import { JoinDto, IAuthService } from './auth.interface';
 
 export default class AuthService implements IAuthService {
+  // 아이디, 이메일 중복 확인 함수 넣기.
   join = async (user: JoinDto): Promise<IUser> => {
     try {
       // Debugger.log('서비스에서 가입 시작');

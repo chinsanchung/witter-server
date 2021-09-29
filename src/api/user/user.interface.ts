@@ -1,6 +1,7 @@
 import { IUser } from '../../models/User';
 
 export interface IProfileDto {
+  user_id: string;
   name: string;
   description: string;
 }
