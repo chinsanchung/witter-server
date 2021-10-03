@@ -8,9 +8,9 @@ const router = express.Router();
 
 router.get('/follower-list', controller.getFollowerList);
 router.get('/following-list', controller.getFollowingList);
+router.patch('/change-profile', isLoggedIn, controller.changeProfile);
 
-router.get('/check-email-duplicate/:email', controller.checkEmailDuplicate);
-router.get('/check-id-duplicate/:userid', controller.checkIdDuplicate);
-router.patch('change-profile', isLoggedIn, controller.changeProfile);
+router.patch('/follow-user', isLoggedIn, controller.followUser);
+router.patch('/unfollow-user', isLoggedIn, controller.unFollowUser);
 
 export default router;
