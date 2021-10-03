@@ -7,13 +7,13 @@ import { IUser } from '../../models/User';
 export default class TweetController {
   constructor(private tweetService: ITweetService) {}
   private createQuery = (req: Request, user_id: string): ICreateDto => {
-    const { tweet_id, contents, comments } = req.body;
+    const { tweet_id, contents } = req.body;
     const query: ICreateDto = {
       tweet_id,
       user_id: user_id,
       contents,
       create_date: new Date(),
-      comments,
+      comments: [],
     };
 
     if (Object.prototype.hasOwnProperty.call(req, 'files')) {
