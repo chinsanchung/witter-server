@@ -26,26 +26,42 @@ export default class UserController {
       res.status(error.status).send(error.message);
     }
   };
-  checkEmailDuplicate = async (req: Request, res: Response) => {
-    const response = await this.userService.checkEmailDuplicate(
-      req.params.email
-    );
-    return res.send(response);
-  };
-  checkIdDuplicate = async (req: Request, res: Response) => {
-    const response = await this.userService.checkIdDuplicate(req.params.userid);
-    return res.send(response);
-  };
   changeProfile = async (req: Request, res: Response) => {
     try {
-      const { name, description } = req.body;
+      const { name, description, profile_color } = req.body;
       await this.userService.changeProfile({
         // @ts-ignore
         user_id: req.user?.user_id,
         name,
         description,
+        profile_color,
       });
       return res.send('success');
+    } catch (error) {
+      res.status(error.status).send(error.message);
+    }
+  };
+
+  followUser = async (req: Request, res: Response) => {
+    try {
+      const { target_user_id } = req.body;
+      await this.userService.followUser({
+        // @ts-ignore
+        user_id: req.user?.user_id,
+        target_user_id,
+      });
+    } catch (error) {
+      res.status(error.status).send(error.message);
+    }
+  };
+  unFollowUser = async (req: Request, res: Response) => {
+    try {
+      const { target_user_id } = req.body;
+      await this.userService.unFollowUser({
+        // @ts-ignore
+        user_id: req.user?.user_id,
+        target_user_id,
+      });
     } catch (error) {
       res.status(error.status).send(error.message);
     }
