@@ -10,8 +10,7 @@ interface IUser {
   country: string;
   follower: string[];
   following: string[];
-  header: IMedia | null;
-  photo: IMedia | null;
+  profile_color: string;
   description: string;
   lock_status: 'all' | 'private';
 }
@@ -22,11 +21,10 @@ const schema = new Schema<IUser>({
   name: { type: String, required: true },
   user_id: { type: String, required: true },
   join_date: { type: Date, required: true },
-  country: { type: String, required: true },
+  country: { type: String, default: 'KR' },
   follower: { type: [String], default: [] },
   following: { type: [String], default: [] },
-  header: { type: mediaSchema, default: null },
-  photo: { type: mediaSchema, default: null },
+  profile_color: { type: String, default: '#17517e' },
   description: { type: String, default: '' },
   lock_status: { type: String, enum: ['all', 'private'], default: 'all' },
 });
