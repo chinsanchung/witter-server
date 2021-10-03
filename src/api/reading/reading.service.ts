@@ -1,8 +1,13 @@
 import { ITweet, TweetModel } from '../../models/Tweet';
 import { ITimeLine, TimeLineModel } from '../../models/TimeLine';
+import { UserModel } from '../../models/User';
 import createError from '../../utils/createError';
 import Debugger from '../../utils/debugger';
-import { IReadingService, IGetTweetsResponse } from './reading.interface';
+import {
+  IReadingService,
+  IGetTweetsResponse,
+  IGetUserTimeLine,
+} from './reading.interface';
 
 export default class ReadingService implements IReadingService {
   private getUserInfoQuery = (writer_id: string) => {
@@ -17,10 +22,12 @@ export default class ReadingService implements IReadingService {
               _id: 0,
               name: '$name',
               user_id: '$user_id',
-              photo: '$photo',
+              profile_color: '$profile_color',
               description: '$description',
-              follower: { $size: '$follower' },
-              following: { $size: '$following' },
+              follower: '$follower',
+              following: '$following',
+              follower_count: { $size: '$follower' },
+              following_count: { $size: '$following' },
             },
           },
         ],
@@ -100,7 +107,7 @@ export default class ReadingService implements IReadingService {
         ...this.defaultSettingQuery,
         { $unwind: '$user' },
       ]);
-      Debugger.log('오리지널', originalTweet);
+      // Debugger.log('오리지널', originalTweet);
       if (originalTweet.length > 0 && originalTweet[0].is_active) {
         const comments = await TweetModel.aggregate([
           { $match: { tweet_id: { $in: originalTweet[0].comments } } },
@@ -109,20 +116,20 @@ export default class ReadingService implements IReadingService {
           { $unwind: '$user' },
           { $sort: { create_date: 1 } },
         ]);
-        Debugger.log('댓글', comments);
+        // Debugger.log('댓글', comments);
         return {
           origin: originalTweet[0],
           comments,
         };
       } else {
-        throw createError(404, '삭제되었거나 존재하지 않는 트윗입니다.');
+        throw createError(404, '존재하지 않는 트윗입니다.');
       }
     } catch (error) {
       throw error;
       // throw createError(500, '트윗을 불러오지 못했습니다.');
     }
   };
-  getUserTimeLine = async (user_id: string): Promise<ITweet[]> => {
+  getUserTimeLine = async (user_id: string): Promise<IGetUserTimeLine> => {
     try {
       const response = await TimeLineModel.aggregate([
         { $match: { user_id } },
@@ -138,8 +145,23 @@ export default class ReadingService implements IReadingService {
         { $unwind: '$user' },
         { $sort: { register_date: -1 } },
       ]);
+      const userSelectWord: string =
+        'name user_id profile_color description follower following';
+      const user = await UserModel.findOne({ user_id })
+        .select(userSelectWord)
+        .lean();
+
       if (response.length > 0) {
-        return response;
+        return {
+          user: {
+            ...user,
+            follower: user.follower,
+            following: user.following,
+            follower_count: user.follower.length,
+            following_count: user.following.length,
+          },
+          timeLine: response,
+        };
       } else {
         throw createError(404, '타임라인이 없습니다.');
       }
