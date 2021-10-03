@@ -39,11 +39,12 @@ export default class App {
         res: express.Response,
         next: express.NextFunction
       ) => {
-        if (process.env.NODE_ENV === 'production') {
-          morgan('combined')(req, res, next);
-        } else {
-          morgan('dev')(req, res, next);
-        }
+        morgan('combined')(req, res, next);
+        // if (process.env.NODE_ENV === 'production') {
+        //   morgan('combined')(req, res, next);
+        // } else {
+        //   morgan('dev')(req, res, next);
+        // }
       }
     );
     this.app.use(
@@ -88,13 +89,16 @@ export default class App {
         this.setApplication();
         this.setRoutes();
 
-        if (process.env.NODE_ENV === 'production') {
-          this.app.use(express.static(path.join(__dirname, '../client_build')));
-          this.app.get('/', (req, res) => {
-            res.sendFile(path.join(__dirname, '../client_build', 'index.html'));
-          });
-        }
-
+        // if (process.env.NODE_ENV === 'production') {
+        //   this.app.use(express.static(path.join(__dirname, '../client_build')));
+        //   this.app.get('/', (req, res) => {
+        //     res.sendFile(path.join(__dirname, '../client_build', 'index.html'));
+        //   });
+        // }
+        this.app.use(express.static(path.join(__dirname, '../client_build')));
+        this.app.get('/', (req, res) => {
+          res.sendFile(path.join(__dirname, '../client_build', 'index.html'));
+        });
         this.app.listen(this.PORT, () =>
           Debugger.log(`포트 ${this.PORT}. 서버 시작`)
         );
