@@ -5,30 +5,31 @@ import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import createError from './utils/createError';
 import cors from 'cors';
-// import redis from 'redis';
-// import connectRedis from 'connect-redis';
+import redis from 'redis';
+import connectRedis from 'connect-redis';
 import passport from 'passport';
+import path from 'path';
 import PassportConfig from './middlewares/passportConfig';
 import Debugger from './utils/debugger';
 import Database from './middlewares/database';
-import routesList from './routes';
+import routes from './routes';
 
 dotenv.config();
 
 export default class App {
   private app: express.Application;
-  private PORT: number = 5000;
-  // private RedisStore: connectRedis.RedisStore;
-  // private redisClient: redis.RedisClient;
+  private PORT: number = process.env.NODE_ENV === 'production' ? 80 : 5000;
+  private RedisStore: connectRedis.RedisStore;
+  private redisClient: redis.RedisClient;
 
   constructor() {
     this.app = express();
     PassportConfig();
-    // this.RedisStore = connectRedis(session);
-    // this.redisClient = redis.createClient({
-    //   url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
-    //   password: process.env.REDIS_PASSWORD,
-    // });
+    this.RedisStore = connectRedis(session);
+    this.redisClient = redis.createClient({
+      url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+      password: process.env.REDIS_PASSWORD,
+    });
   }
 
   private setApplication = (): void => {
@@ -67,7 +68,7 @@ export default class App {
         saveUninitialized: false,
         secret: process.env.COOKIE_SECRET,
         cookie: { httpOnly: true, secure: false },
-        // store: new this.RedisStore({ client: this.redisClient }),
+        store: new this.RedisStore({ client: this.redisClient }),
       })
     );
     this.app.use(passport.initialize());
@@ -75,9 +76,10 @@ export default class App {
   };
 
   private setRoutes = (): void => {
-    for (const route of routesList) {
-      this.app.use(route.path, route.router);
-    }
+    this.app.use('/api', routes);
+    // for (const route of routesList) {
+    //   this.app.use(route.path, route.router);
+    // }
   };
 
   public initialize = (): void => {
@@ -85,6 +87,13 @@ export default class App {
       .then(() => {
         this.setApplication();
         this.setRoutes();
+
+        if (process.env.NODE_ENV === 'production') {
+          this.app.use(express.static(path.join(__dirname, '../client_build')));
+          this.app.get('/', (req, res) => {
+            res.sendFile(path.join(__dirname, '../client_build', 'index.html'));
+          });
+        }
 
         this.app.listen(this.PORT, () =>
           Debugger.log(`포트 ${this.PORT}. 서버 시작`)
