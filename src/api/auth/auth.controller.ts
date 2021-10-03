@@ -14,8 +14,8 @@ export default class AuthController {
   };
 
   join = async (req: Request, res: Response) => {
-    const { email, password, name, user_id, country }: JoinDto = req.body;
-    // Debugger.log(req.body);
+    const { email, password, name, user_id }: JoinDto = req.body;
+    Debugger.log(req.body);
     try {
       const newPassword: string = this.convertPassword(password);
       await this.authService.join({
@@ -23,13 +23,12 @@ export default class AuthController {
         password: newPassword,
         name,
         user_id,
-        country,
         join_date: new Date(),
       });
       return res.send('success');
     } catch (error) {
       Debugger.error(error);
-      return res.status(500).send('회원 가입에 에러가 발생했습니다.');
+      return res.status(error?.status).send(error?.message);
     }
   };
   login = (req: Request, res: Response, next: NextFunction) => {
@@ -69,7 +68,7 @@ export default class AuthController {
     });
   };
   tokenRefresh = (req: Request, res: Response) => {
-    Debugger.log('토큰 로그인 갱신하기', req?.user);
+    Debugger.log('토큰 로그인 갱신하기');
     return res.json(req.user);
   };
 }

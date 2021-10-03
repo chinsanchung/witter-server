@@ -6,7 +6,6 @@ export interface JoinDto {
   readonly name: string; // 닉네임
   readonly user_id: string; // @ 로 시작하는 아이디
   readonly join_date: Date;
-  readonly country: string;
 }
 
 export interface IAuthService {
