@@ -19,6 +19,10 @@ interface ISingleTweet {
   create_date: Date;
   retweet: string[];
   like: string[];
+  comments: number[];
+  retweet_count?: number;
+  like_count?: number;
+  comments_count?: number;
   is_active: boolean;
   image: { key: string; url: string }[];
   user: IUserForTweet;
