@@ -50,6 +50,7 @@ export default class UserController {
         user_id: req.user?.user_id,
         target_user_id,
       });
+      return res.send('follow success');
     } catch (error) {
       res.status(error.status).send(error.message);
     }
@@ -62,6 +63,7 @@ export default class UserController {
         user_id: req.user?.user_id,
         target_user_id,
       });
+      return res.send('unfollow success');
     } catch (error) {
       res.status(error.status).send(error.message);
     }
