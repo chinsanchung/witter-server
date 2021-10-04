@@ -19,7 +19,8 @@ dotenv.config();
 export default class App {
   private app: express.Application;
   // private PORT: number = process.env.NODE_ENV === 'production' ? 80 : 5000;
-  private PORT: number = 80;
+  // private PORT: number = 80;
+  private PORT = process.env.PORT || 5000;
   private RedisStore: connectRedis.RedisStore;
   private redisClient: redis.RedisClient;
 
