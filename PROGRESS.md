@@ -50,3 +50,35 @@
 ### 09/29
 
 - 사용자 관련 기능 "api/user" 의 컨트롤러, 서비스를 작성했습니다.
+
+### 10/02
+
+- Tweet 스키마 모델에 답글의 대상 트윗의 아이디를 담은 comment_target_id 를 작성하고, 답글을 작성할 때 추가하도록 설정했습니다.
+  - 클라이언트의 트윗 상세보기에서, 답글일 경우 상단에 답글의 대상 트윗이 나타나도록 수정했습니다.
+    <!-- comment_target_id?: number; // 답글을 단 대상 트윗의 tweet_id -->
+    <!-- comment_target_id: { type: Number }, -->
+
+### 10/03
+
+- getUserTimeLine 변경하기: 트윗 목록뿐만 아니라 해당 사용자의 정보도 응답으로 보내도록 수정했습니다.
+- S3 의 무료 기한이 끝나는 것을 고려해서, 사용자의 프로필 사진과 헤더를 제거하고 프로필은 hex 색상 코드로 입력하도록 User 스키마에 profile_color 를 추가했습니다.
+- 헤로쿠에 빌드하는 과정에서 아래와 같은 에러가 발생했습니다.
+
+```
+Failed at the twitter_clone_server@1.0.0 start script.
+This is probably not a problem with npm. There is likely additional logging output above.
+```
+
+원인을 검색한 결과 [cross-env is a development dependency. Heroku, by default, only installs production dependencies. That's why it's throwing that error.](https://stackoverflow.com/a/68676440)라는 글를 찾았습니다.
+
+그래서 빌드 전용으로 임시로 process.env.NODE_ENV 조건문을 제거하고 깃에 올렸습니다. Config Vars 에서 .env 에 등록했던 값을 등록했습니다. [출처](https://gompro.postype.com/post/975726)
+
+### 10/04
+
+- 팔로우, 언팔로우 API 의 응답에 변경된 사용자 정보를 보내도록 수정하고, 클라이언트에서 useSWR 으로 비동기적으로 상태를 갱신하도록 했습니다.
+- 상세 트윗을 불러올 떄 useSWR 으로 불러오도록 수정하고, 답글의 등록과 동시에 상태를 갱신하도록 했습니다.
+- 홈 타임라인을 불러오는 것도 useSWR 으로 수정하고, 트윗의 등록과 동시에 타임라인을 갱신하도록 했습니다.
+- 리트윗, 좋아요 기능을 API 와 연결했습니다.
+- 홈 타임라인에서 사용한 중복을 제거하는 aggregate 문 일부를 변수로 추출했고, 사용자 페이지의 타임라인 aggregate 쿼리에 추가해 트윗의 중복을 제거하도록 했습니다.
+- PORT 설정을 변경하고 클라이언트의 baseURL 을 변경했습니다. heroku 는 dynamic port 를 제공하기 떄문에 빌드 버전의 port 를 고정값으로 하면 안된다고 합니다. [출처](https://stackoverflow.com/a/52992592)
+  - 그래서 app.tsx 의 PORT 설정을 `process.env.PORT || 5000;`으로, 클라이언트 defaults.baseURL 을 `/api`으로 수정했습니다.
