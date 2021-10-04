@@ -96,6 +96,37 @@ export default class ReadingService implements IReadingService {
     is_retweet: '$tweet_list.is_retweet',
     register_date: '$tweet_list.register_date',
   };
+
+  private removeDuplicateFromTimeLine = [
+    {
+      $group: {
+        _id: '$tweet_id',
+        orig: { $push: '$$ROOT' },
+      },
+    },
+    { $project: { data: { $first: '$orig' } } },
+    {
+      $project: {
+        user_id: '$data.user_id',
+        writer_id: '$data.writer_id',
+        tweet_id: '$data.tweet_id',
+        video: '$data.video',
+        image: '$data.image',
+        contents: '$data.contents',
+        create_date: '$data.create_date',
+        retweet: '$data.retweet',
+        retweet_count: '$data.retweet_count',
+        like: '$data.like',
+        like_count: '$data.like_count',
+        comments: '$data.comments',
+        comments_count: '$data.comments_count',
+        is_retweet: '$data.is_retweet',
+        register_date: '$data.register_date',
+        user: '$data.user',
+      },
+    },
+  ];
+
   private timeLineLimit: number = 10;
 
   getTweets = async (tweet_id: number): Promise<IGetTweetsResponse> => {
@@ -143,6 +174,7 @@ export default class ReadingService implements IReadingService {
         },
         this.getUserInfoQuery('writer_id'),
         { $unwind: '$user' },
+        ...this.removeDuplicateFromTimeLine,
         { $sort: { register_date: -1 } },
       ]);
       const userSelectWord: string =
@@ -214,33 +246,7 @@ export default class ReadingService implements IReadingService {
         },
         this.getUserInfoQuery('writer_id'),
         { $unwind: '$user' },
-        {
-          $group: {
-            _id: '$tweet_id',
-            orig: { $push: '$$ROOT' },
-          },
-        },
-        { $project: { data: { $first: '$orig' } } },
-        {
-          $project: {
-            user_id: '$data.user_id',
-            writer_id: '$data.writer_id',
-            tweet_id: '$data.tweet_id',
-            video: '$data.video',
-            image: '$data.image',
-            contents: '$data.contents',
-            create_date: '$data.create_date',
-            retweet: '$data.retweet',
-            retweet_count: '$data.retweet_count',
-            like: '$data.like',
-            like_count: '$data.like_count',
-            comments: '$data.comments',
-            comments_count: '$data.comments_count',
-            is_retweet: '$data.is_retweet',
-            register_date: '$data.register_date',
-            user: '$data.user',
-          },
-        },
+        ...this.removeDuplicateFromTimeLine,
         { $sort: { register_date: -1 } },
       ]);
 
