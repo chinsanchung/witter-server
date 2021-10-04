@@ -98,7 +98,7 @@ export default class App {
         //   });
         // }
         this.app.use(express.static(path.join(__dirname, '../client_build')));
-        this.app.get('/', (req, res) => {
+        this.app.get('*', (req, res) => {
           res.sendFile(path.join(__dirname, '../client_build', 'index.html'));
         });
         this.app.listen(this.PORT, () =>
