@@ -4,7 +4,14 @@ import { IUserService, IProfileDto, IFollowDto } from './user.interface';
 import Debugger from '../../utils/debugger';
 
 export default class UserService implements IUserService {
-  getFollowerList = async (user_id: string): Promise<IUser[]> => {
+  constructor() {
+    this.getFollowerList = this.getFollowerList.bind(this);
+    this.getFollowingList = this.getFollowingList.bind(this);
+    this.changeProfile = this.changeProfile.bind(this);
+    this.followUser = this.followUser.bind(this);
+    this.unFollowUser = this.unFollowUser.bind(this);
+  }
+  async getFollowerList(user_id: string): Promise<IUser[]> {
     try {
       const user = await UserModel.findOne({ user_id })
         .select('follower')
@@ -20,8 +27,8 @@ export default class UserService implements IUserService {
     } catch (error) {
       throw error;
     }
-  };
-  getFollowingList = async (user_id: string): Promise<IUser[]> => {
+  }
+  async getFollowingList(user_id: string): Promise<IUser[]> {
     try {
       const user = await UserModel.findOne({ user_id })
         .select('following')
@@ -37,14 +44,14 @@ export default class UserService implements IUserService {
     } catch (error) {
       throw error;
     }
-  };
+  }
 
-  changeProfile = async ({
+  async changeProfile({
     user_id,
     name,
     description,
     profile_color,
-  }: IProfileDto): Promise<void> => {
+  }: IProfileDto): Promise<void> {
     try {
       const response = await UserModel.findOneAndUpdate(
         {
@@ -66,12 +73,9 @@ export default class UserService implements IUserService {
     } catch (error) {
       throw error;
     }
-  };
+  }
 
-  followUser = async ({
-    user_id,
-    target_user_id,
-  }: IFollowDto): Promise<void> => {
+  async followUser({ user_id, target_user_id }: IFollowDto): Promise<void> {
     try {
       Debugger.log('followUser 시작', user_id, ', ', target_user_id);
       // 로그인한 유저의 following 에 상대방 아이디를 추가
@@ -102,11 +106,8 @@ export default class UserService implements IUserService {
     } catch (error) {
       throw error;
     }
-  };
-  unFollowUser = async ({
-    user_id,
-    target_user_id,
-  }: IFollowDto): Promise<void> => {
+  }
+  async unFollowUser({ user_id, target_user_id }: IFollowDto): Promise<void> {
     try {
       Debugger.log('unFollowUser 시작', user_id, ', ', target_user_id);
       // 로그인한 유저의 following 에 상대방 아이디를 추가
@@ -137,5 +138,5 @@ export default class UserService implements IUserService {
     } catch (error) {
       throw error;
     }
-  };
+  }
 }

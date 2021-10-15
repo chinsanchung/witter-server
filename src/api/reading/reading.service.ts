@@ -10,31 +10,15 @@ import {
 } from './reading.interface';
 
 export default class ReadingService implements IReadingService {
-  private getUserInfoQuery = (writer_id: string) => {
-    return {
-      $lookup: {
-        from: 'users',
-        let: { writer_id: `$${writer_id}` },
-        pipeline: [
-          { $match: { $expr: { $eq: ['$user_id', '$$writer_id'] } } },
-          {
-            $project: {
-              _id: 0,
-              name: '$name',
-              user_id: '$user_id',
-              profile_color: '$profile_color',
-              description: '$description',
-              follower: '$follower',
-              following: '$following',
-              follower_count: { $size: '$follower' },
-              following_count: { $size: '$following' },
-            },
-          },
-        ],
-        as: 'user',
-      },
-    };
-  };
+  constructor() {
+    this.getUserInfoQuery = this.getUserInfoQuery.bind(this);
+
+    this.getTweets = this.getTweets.bind(this);
+    this.getUserTimeLine = this.getUserTimeLine.bind(this);
+    this.getUserLikeTimeLine = this.getUserLikeTimeLine.bind(this);
+    this.getHomeTimeLine = this.getHomeTimeLine.bind(this);
+  }
+
   private defaultSettingQuery = [
     {
       $set: {
@@ -77,7 +61,6 @@ export default class ReadingService implements IReadingService {
       as: 'tweet',
     },
   };
-
   private projectTweetQuery = {
     _id: 0,
     user_id: '$user_id',
@@ -96,7 +79,6 @@ export default class ReadingService implements IReadingService {
     is_retweet: '$tweet_list.is_retweet',
     register_date: '$tweet_list.register_date',
   };
-
   private removeDuplicateFromTimeLine = [
     {
       $group: {
@@ -126,10 +108,34 @@ export default class ReadingService implements IReadingService {
       },
     },
   ];
+  private TIMELINE_LIMIT: number = 10;
+  private getUserInfoQuery(writer_id: string) {
+    return {
+      $lookup: {
+        from: 'users',
+        let: { writer_id: `$${writer_id}` },
+        pipeline: [
+          { $match: { $expr: { $eq: ['$user_id', '$$writer_id'] } } },
+          {
+            $project: {
+              _id: 0,
+              name: '$name',
+              user_id: '$user_id',
+              profile_color: '$profile_color',
+              description: '$description',
+              follower: '$follower',
+              following: '$following',
+              follower_count: { $size: '$follower' },
+              following_count: { $size: '$following' },
+            },
+          },
+        ],
+        as: 'user',
+      },
+    };
+  }
 
-  private timeLineLimit: number = 10;
-
-  getTweets = async (tweet_id: number): Promise<IGetTweetsResponse> => {
+  async getTweets(tweet_id: number): Promise<IGetTweetsResponse> {
     // 트윗 하나를 클릭했을 때 해당 트윗과 답글들을 출력합니다.
     try {
       const originalTweet = await TweetModel.aggregate([
@@ -159,8 +165,9 @@ export default class ReadingService implements IReadingService {
       throw error;
       // throw createError(500, '트윗을 불러오지 못했습니다.');
     }
-  };
-  getUserTimeLine = async (user_id: string): Promise<IGetUserTimeLine> => {
+  }
+
+  async getUserTimeLine(user_id: string): Promise<IGetUserTimeLine> {
     try {
       const response = await TimeLineModel.aggregate([
         { $match: { user_id } },
@@ -200,8 +207,8 @@ export default class ReadingService implements IReadingService {
     } catch (error) {
       throw error;
     }
-  };
-  getUserLikeTimeLine = async (user_id: string): Promise<ITweet[]> => {
+  }
+  async getUserLikeTimeLine(user_id: string): Promise<ITweet[]> {
     try {
       const response = await TimeLineModel.aggregate([
         { $match: { user_id } },
@@ -225,14 +232,14 @@ export default class ReadingService implements IReadingService {
     } catch (error) {
       throw error;
     }
-  };
-  getHomeTimeLine = async ({
+  }
+  async getHomeTimeLine({
     user_id,
     following,
   }: {
     user_id: string;
     following: string[];
-  }): Promise<ITweet[]> => {
+  }): Promise<ITweet[]> {
     try {
       const response = await TimeLineModel.aggregate([
         { $match: { user_id: { $in: [...following, user_id] } } },
@@ -258,5 +265,5 @@ export default class ReadingService implements IReadingService {
     } catch (error) {
       throw error;
     }
-  };
+  }
 }

@@ -17,20 +17,34 @@ interface ITweetWithTimeLineParameter {
 }
 
 export default class TweetService implements ITweetService {
-  private checkTweetExistence = async (tweet_id: number): Promise<boolean> => {
+  constructor() {
+    this.checkTweetExistence = this.checkTweetExistence.bind(this);
+    this.addTweetToTimeLine = this.addTweetToTimeLine.bind(this);
+    this.deleteTweetFromTimeLine = this.deleteTweetFromTimeLine.bind(this);
+
+    this.createTweet = this.createTweet.bind(this);
+    this.deleteTweet = this.deleteTweet.bind(this);
+    this.doRetweet = this.doRetweet.bind(this);
+    this.unDoRetweet = this.unDoRetweet.bind(this);
+    this.doLike = this.doLike.bind(this);
+    this.unDoLike = this.unDoLike.bind(this);
+    this.addCommentTweet = this.addCommentTweet.bind(this);
+    this.deleteCommentTweet = this.deleteCommentTweet.bind(this);
+  }
+  private async checkTweetExistence(tweet_id: number): Promise<boolean> {
     const response = await TweetModel.findOne({ tweet_id })
       .select('tweet_id')
       .lean();
     if (response) {
       return true;
     } else return false;
-  };
-  private addTweetToTimeLine = async ({
+  }
+  private async addTweetToTimeLine({
     user_id,
     tweet_id,
     is_retweet,
     target_list,
-  }: ITweetWithTimeLineParameter): Promise<void> => {
+  }: ITweetWithTimeLineParameter): Promise<void> {
     try {
       await TimeLineModel.updateOne(
         { user_id },
@@ -49,12 +63,12 @@ export default class TweetService implements ITweetService {
     } catch (error) {
       throw createError(500, '타임라인에 트윗을 등록하는 데 실패했습니다.');
     }
-  };
-  private deleteTweetFromTimeLine = async ({
+  }
+  private async deleteTweetFromTimeLine({
     user_id,
     tweet_id,
     target_list,
-  }: ITweetWithTimeLineParameter): Promise<void> => {
+  }: ITweetWithTimeLineParameter): Promise<void> {
     try {
       await TimeLineModel.updateOne(
         { user_id },
@@ -65,9 +79,9 @@ export default class TweetService implements ITweetService {
     } catch (error) {
       throw createError(500, '타임라인에서 트윗을 삭제하는 데 실패했습니다.');
     }
-  };
+  }
 
-  createTweet = async (tweet: ICreateDto): Promise<ITweet> => {
+  async createTweet(tweet: ICreateDto): Promise<ITweet> {
     try {
       // Debugger.log('서비스에서 트윗 생성');
       const newTweet = await TweetModel.create(tweet);
@@ -83,8 +97,8 @@ export default class TweetService implements ITweetService {
       Debugger.error('트윗 생성 에러: ', error);
       throw createError(500, '트윗 생성 과정에서 에러가 발생했습니다.');
     }
-  };
-  deleteTweet = async (tweet_id: number): Promise<void> => {
+  }
+  async deleteTweet(tweet_id: number): Promise<void> {
     try {
       const response = await TweetModel.findOneAndUpdate(
         { tweet_id },
@@ -106,9 +120,9 @@ export default class TweetService implements ITweetService {
     } catch (error) {
       throw error;
     }
-  };
+  }
 
-  doRetweet = async ({ tweet_id, user_id }: ITweetActionDto): Promise<void> => {
+  async doRetweet({ tweet_id, user_id }: ITweetActionDto): Promise<void> {
     try {
       const isExistTweet = await this.checkTweetExistence(tweet_id);
       if (!isExistTweet) {
@@ -130,11 +144,8 @@ export default class TweetService implements ITweetService {
     } catch (error) {
       throw error;
     }
-  };
-  unDoRetweet = async ({
-    tweet_id,
-    user_id,
-  }: ITweetActionDto): Promise<void> => {
+  }
+  async unDoRetweet({ tweet_id, user_id }: ITweetActionDto): Promise<void> {
     try {
       const isExistTweet = await this.checkTweetExistence(tweet_id);
       if (!isExistTweet) {
@@ -155,9 +166,9 @@ export default class TweetService implements ITweetService {
     } catch (error) {
       throw error;
     }
-  };
+  }
 
-  doLike = async ({ tweet_id, user_id }: ITweetActionDto): Promise<void> => {
+  async doLike({ tweet_id, user_id }: ITweetActionDto): Promise<void> {
     try {
       const isExistTweet = await this.checkTweetExistence(tweet_id);
       if (!isExistTweet) {
@@ -176,8 +187,8 @@ export default class TweetService implements ITweetService {
     } catch (error) {
       throw error;
     }
-  };
-  unDoLike = async ({ tweet_id, user_id }: ITweetActionDto): Promise<void> => {
+  }
+  async unDoLike({ tweet_id, user_id }: ITweetActionDto): Promise<void> {
     try {
       const isExistTweet = await this.checkTweetExistence(tweet_id);
       if (!isExistTweet) {
@@ -195,12 +206,12 @@ export default class TweetService implements ITweetService {
     } catch (error) {
       throw error;
     }
-  };
+  }
 
-  addCommentTweet = async ({
+  async addCommentTweet({
     tweet,
     target_tweet_id,
-  }: ICommentDto): Promise<ITweet> => {
+  }: ICommentDto): Promise<ITweet> {
     try {
       const isExistTweet = await this.checkTweetExistence(target_tweet_id);
       if (isExistTweet) {
@@ -223,12 +234,12 @@ export default class TweetService implements ITweetService {
     } catch (error) {
       throw error;
     }
-  };
-  deleteCommentTweet = async (
+  }
+  async deleteCommentTweet(
     orig_tweet_id: number,
     comment_tweet_id: number,
     comment_writer_id: string
-  ): Promise<void> => {
+  ): Promise<void> {
     try {
       const response = await TweetModel.findOneAndUpdate(
         { tweet_id: orig_tweet_id },
@@ -248,5 +259,5 @@ export default class TweetService implements ITweetService {
     } catch (error) {
       throw error;
     }
-  };
+  }
 }

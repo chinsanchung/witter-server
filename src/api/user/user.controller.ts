@@ -4,9 +4,15 @@ import Debugger from '../../utils/debugger';
 import { IUserService } from './user.interface';
 
 export default class UserController {
-  constructor(private userService: IUserService) {}
+  constructor(private userService: IUserService) {
+    this.getFollowerList = this.getFollowerList.bind(this);
+    this.getFollowingList = this.getFollowingList.bind(this);
+    this.changeProfile = this.changeProfile.bind(this);
+    this.followUser = this.followUser.bind(this);
+    this.unFollowUser = this.unFollowUser.bind(this);
+  }
 
-  getFollowerList = async (req: Request, res: Response) => {
+  async getFollowerList(req: Request, res: Response) {
     try {
       const response = await this.userService.getFollowerList(
         req.params.user_id
@@ -15,8 +21,8 @@ export default class UserController {
     } catch (error) {
       res.status(error.status).send(error.message);
     }
-  };
-  getFollowingList = async (req: Request, res: Response) => {
+  }
+  async getFollowingList(req: Request, res: Response) {
     try {
       const response = await this.userService.getFollowingList(
         req.params.user_id
@@ -25,8 +31,8 @@ export default class UserController {
     } catch (error) {
       res.status(error.status).send(error.message);
     }
-  };
-  changeProfile = async (req: Request, res: Response) => {
+  }
+  async changeProfile(req: Request, res: Response) {
     try {
       const { name, description, profile_color } = req.body;
       await this.userService.changeProfile({
@@ -40,9 +46,9 @@ export default class UserController {
     } catch (error) {
       res.status(error.status).send(error.message);
     }
-  };
+  }
 
-  followUser = async (req: Request, res: Response) => {
+  async followUser(req: Request, res: Response) {
     try {
       const { target_user_id } = req.body;
       await this.userService.followUser({
@@ -54,8 +60,8 @@ export default class UserController {
     } catch (error) {
       res.status(error.status).send(error.message);
     }
-  };
-  unFollowUser = async (req: Request, res: Response) => {
+  }
+  async unFollowUser(req: Request, res: Response) {
     try {
       const { target_user_id } = req.body;
       await this.userService.unFollowUser({
@@ -67,5 +73,5 @@ export default class UserController {
     } catch (error) {
       res.status(error.status).send(error.message);
     }
-  };
+  }
 }

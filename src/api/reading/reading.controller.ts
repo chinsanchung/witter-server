@@ -3,9 +3,13 @@ import ReadingService from './reading.service';
 import Debugger from '../../utils/debugger';
 
 export default class ReadingController {
-  constructor(private readingService: ReadingService) {}
+  constructor(private readingService: ReadingService) {
+    this.getTweets = this.getTweets.bind(this);
+    this.getUserTimeLine = this.getUserTimeLine.bind(this);
+    this.getHomeTimeLine = this.getHomeTimeLine.bind(this);
+  }
 
-  getTweets = async (req: Request, res: Response) => {
+  async getTweets(req: Request, res: Response) {
     try {
       Debugger.log('트윗 읽기 시작: ', req.params);
       const tweet_id: number = parseInt(req.params.tweetid);
@@ -15,9 +19,9 @@ export default class ReadingController {
       Debugger.error(error);
       return res.status(error.status).send(error.message);
     }
-  };
+  }
 
-  getUserTimeLine = async (req: Request, res: Response) => {
+  async getUserTimeLine(req: Request, res: Response) {
     try {
       Debugger.log('특정 사용자의 타임라인 읽기 시작', req.params);
       const user_id: string = req.params.userid;
@@ -27,9 +31,9 @@ export default class ReadingController {
       Debugger.error(error);
       return res.json([]);
     }
-  };
+  }
 
-  getHomeTimeLine = async (req: Request, res: Response) => {
+  async getHomeTimeLine(req: Request, res: Response) {
     try {
       // @ts-ignore
       const { user_id, following }: IUser = req.user;
@@ -44,5 +48,5 @@ export default class ReadingController {
       Debugger.error(error);
       return res.json([]);
     }
-  };
+  }
 }

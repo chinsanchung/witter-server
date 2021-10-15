@@ -5,7 +5,13 @@ import Debugger from '../../utils/debugger';
 import { JoinDto, IAuthService } from './auth.interface';
 
 export default class AuthService implements IAuthService {
-  private checkEmailDuplicate = async (email: string): Promise<boolean> => {
+  constructor() {
+    this.checkEmailDuplicate = this.checkEmailDuplicate.bind(this);
+    this.checkIdDuplicate = this.checkIdDuplicate.bind(this);
+
+    this.join = this.join.bind(this);
+  }
+  private async checkEmailDuplicate(email: string): Promise<boolean> {
     const response = await UserModel.findOne({ email }).lean();
     if (response) {
       Debugger.log('중복 이메일');
@@ -13,8 +19,8 @@ export default class AuthService implements IAuthService {
     } else {
       return false;
     }
-  };
-  private checkIdDuplicate = async (user_id: string): Promise<boolean> => {
+  }
+  private async checkIdDuplicate(user_id: string): Promise<boolean> {
     const response = await UserModel.findOne({ user_id }).lean();
     if (response) {
       Debugger.log('중복 이메일');
@@ -22,9 +28,9 @@ export default class AuthService implements IAuthService {
     } else {
       return false;
     }
-  };
+  }
   // 아이디, 이메일 중복 확인 함수 넣기.
-  join = async (user: JoinDto): Promise<IUser> => {
+  async join(user: JoinDto): Promise<IUser> {
     try {
       const isDuplicateEmail = await this.checkEmailDuplicate(user.email);
       const isDuplicateId = await this.checkIdDuplicate(user.user_id);
@@ -45,5 +51,5 @@ export default class AuthService implements IAuthService {
     } catch (error) {
       throw error;
     }
-  };
+  }
 }

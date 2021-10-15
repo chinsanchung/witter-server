@@ -5,8 +5,19 @@ import { ITweet } from '../../models/Tweet';
 import { IUser } from '../../models/User';
 
 export default class TweetController {
-  constructor(private tweetService: ITweetService) {}
-  private createQuery = (req: Request, user_id: string): ICreateDto => {
+  constructor(private tweetService: ITweetService) {
+    this.createQuery = this.createQuery.bind(this);
+
+    this.createTweet = this.createTweet.bind(this);
+    this.deleteTweet = this.deleteTweet.bind(this);
+    this.doRetweet = this.doRetweet.bind(this);
+    this.unDoRetweet = this.unDoRetweet.bind(this);
+    this.doLike = this.doLike.bind(this);
+    this.unDoLike = this.unDoLike.bind(this);
+    this.addCommentTweet = this.addCommentTweet.bind(this);
+    this.deleteCommentTweet = this.deleteCommentTweet.bind(this);
+  }
+  private createQuery(req: Request, user_id: string): ICreateDto {
     const { tweet_id, contents } = req.body;
     const query: ICreateDto = {
       tweet_id,
@@ -30,8 +41,8 @@ export default class TweetController {
       query.video = { key: req.file.key, url: req.file.location };
     }
     return query;
-  };
-  createTweet = async (req: Request, res: Response) => {
+  }
+  async createTweet(req: Request, res: Response) {
     // @ts-ignore
     const user_id: IUser['user_id'] = req.user?.user_id;
     // const user_id = 'testID';
@@ -46,8 +57,8 @@ export default class TweetController {
       Debugger.error(error.message);
       return res.status(error.status).send(error.message);
     }
-  };
-  deleteTweet = async (req: Request, res: Response) => {
+  }
+  async deleteTweet(req: Request, res: Response) {
     const { tweet_id } = req.body;
     try {
       await this.tweetService.deleteTweet(tweet_id);
@@ -56,9 +67,9 @@ export default class TweetController {
       Debugger.error(error.message);
       return res.status(error.status).send(error.message);
     }
-  };
+  }
 
-  doRetweet = async (req: Request, res: Response) => {
+  async doRetweet(req: Request, res: Response) {
     const { tweet_id } = req.body;
     // @ts-ignore
     const user_id: IUser['user_id'] = req.user?.user_id;
@@ -73,8 +84,8 @@ export default class TweetController {
       Debugger.error(error);
       return res.status(error.status).send(error.message);
     }
-  };
-  unDoRetweet = async (req: Request, res: Response) => {
+  }
+  async unDoRetweet(req: Request, res: Response) {
     const { tweet_id } = req.body;
     // @ts-ignore
     const user_id: IUser['user_id'] = req.user?.user_id;
@@ -89,9 +100,9 @@ export default class TweetController {
       Debugger.error(error);
       return res.status(error.status).send(error.message);
     }
-  };
+  }
 
-  doLike = async (req: Request, res: Response) => {
+  async doLike(req: Request, res: Response) {
     const { tweet_id } = req.body;
     // @ts-ignore
     const user_id: IUser['user_id'] = req.user?.user_id;
@@ -106,8 +117,8 @@ export default class TweetController {
       Debugger.error(error);
       return res.status(error.status).send(error.message);
     }
-  };
-  unDoLike = async (req: Request, res: Response) => {
+  }
+  async unDoLike(req: Request, res: Response) {
     const { tweet_id } = req.body;
     // @ts-ignore
     const user_id: IUser['user_id'] = req.user?.user_id;
@@ -122,9 +133,9 @@ export default class TweetController {
       Debugger.error(error);
       return res.status(error.status).send(error.message);
     }
-  };
+  }
 
-  addCommentTweet = async (req: Request, res: Response) => {
+  async addCommentTweet(req: Request, res: Response) {
     // @ts-ignore
     const user_id: IUser['user_id'] = req.user?.user_id;
     // const user_id = 'testID';
@@ -141,8 +152,8 @@ export default class TweetController {
       Debugger.error(error.message);
       return res.status(error.status).send(error.message);
     }
-  };
-  deleteCommentTweet = async (req: Request, res: Response) => {
+  }
+  async deleteCommentTweet(req: Request, res: Response) {
     const { orig_tweet_id, comment_tweet_id } = req.body;
 
     try {
@@ -158,5 +169,5 @@ export default class TweetController {
     } catch (error) {
       return res.status(error.status).send(error.message);
     }
-  };
+  }
 }
