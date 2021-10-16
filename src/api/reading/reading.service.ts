@@ -1,19 +1,13 @@
-import { ITweet, TweetModel } from '../../models/Tweet';
-import { ITimeLine, TimeLineModel } from '../../models/TimeLine';
+import { ITweet } from '../../models/Tweet';
+import { TimeLineModel } from '../../models/TimeLine';
 import { UserModel } from '../../models/User';
 import createError from '../../utils/createError';
-import Debugger from '../../utils/debugger';
-import {
-  IReadingService,
-  IGetTweetsResponse,
-  IGetUserTimeLine,
-} from './reading.interface';
+import { IReadingService, IGetUserTimeLineDto } from './reading.interface';
 
 export default class ReadingService implements IReadingService {
   constructor() {
     this.getUserInfoQuery = this.getUserInfoQuery.bind(this);
 
-    this.getTweets = this.getTweets.bind(this);
     this.getUserTimeLine = this.getUserTimeLine.bind(this);
     this.getUserLikeTimeLine = this.getUserLikeTimeLine.bind(this);
     this.getHomeTimeLine = this.getHomeTimeLine.bind(this);
@@ -135,39 +129,7 @@ export default class ReadingService implements IReadingService {
     };
   }
 
-  async getTweets(tweet_id: number): Promise<IGetTweetsResponse> {
-    // 트윗 하나를 클릭했을 때 해당 트윗과 답글들을 출력합니다.
-    try {
-      const originalTweet = await TweetModel.aggregate([
-        { $match: { tweet_id } },
-        this.getUserInfoQuery('user_id'),
-        ...this.defaultSettingQuery,
-        { $unwind: '$user' },
-      ]);
-      // Debugger.log('오리지널', originalTweet);
-      if (originalTweet.length > 0 && originalTweet[0].is_active) {
-        const comments = await TweetModel.aggregate([
-          { $match: { tweet_id: { $in: originalTweet[0].comments } } },
-          this.getUserInfoQuery('user_id'),
-          ...this.defaultSettingQuery,
-          { $unwind: '$user' },
-          { $sort: { create_date: 1 } },
-        ]);
-        // Debugger.log('댓글', comments);
-        return {
-          origin: originalTweet[0],
-          comments,
-        };
-      } else {
-        throw createError(404, '존재하지 않는 트윗입니다.');
-      }
-    } catch (error) {
-      throw error;
-      // throw createError(500, '트윗을 불러오지 못했습니다.');
-    }
-  }
-
-  async getUserTimeLine(user_id: string): Promise<IGetUserTimeLine> {
+  async getUserTimeLine(user_id: string): Promise<IGetUserTimeLineDto> {
     try {
       const response = await TimeLineModel.aggregate([
         { $match: { user_id } },

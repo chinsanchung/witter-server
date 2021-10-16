@@ -6,8 +6,7 @@ import ReadingService from '../api/reading/reading.service';
 const controller = new ReadingController(new ReadingService());
 const router = express.Router();
 
-router.get('/home', controller.getHomeTimeLine);
-router.get('/timeline/:userid', controller.getUserTimeLine);
-router.get('/:tweetid', controller.getTweets);
+router.get('/', isLoggedIn, controller.getHomeTimeLine); // 메인 타임라인 출력하기
+router.get('/:user_id', controller.getUserTimeLine); // 특정 사용자의 타임라인 출력하기
 
 export default router;

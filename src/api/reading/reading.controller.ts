@@ -4,27 +4,14 @@ import Debugger from '../../utils/debugger';
 
 export default class ReadingController {
   constructor(private readingService: ReadingService) {
-    this.getTweets = this.getTweets.bind(this);
     this.getUserTimeLine = this.getUserTimeLine.bind(this);
     this.getHomeTimeLine = this.getHomeTimeLine.bind(this);
-  }
-
-  async getTweets(req: Request, res: Response) {
-    try {
-      Debugger.log('트윗 읽기 시작: ', req.params);
-      const tweet_id: number = parseInt(req.params.tweetid);
-      const response = await this.readingService.getTweets(tweet_id);
-      return res.json(response);
-    } catch (error) {
-      Debugger.error(error);
-      return res.status(error.status).send(error.message);
-    }
   }
 
   async getUserTimeLine(req: Request, res: Response) {
     try {
       Debugger.log('특정 사용자의 타임라인 읽기 시작', req.params);
-      const user_id: string = req.params.userid;
+      const user_id: string = req.params.user_id;
       const response = await this.readingService.getUserTimeLine(user_id);
       return res.json(response);
     } catch (error) {
