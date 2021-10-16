@@ -6,17 +6,20 @@ import TweetService from '../api/tweet/tweet.service';
 const controller = new TweetController(new TweetService());
 const router = express.Router();
 
-router.post('/create', isLoggedIn, controller.createTweet);
-router.post('/add-comment', isLoggedIn, controller.addCommentTweet);
+router.get('/:tweet_id', controller.getTweet); // 트윗과 답글 조회
 
-router.patch('/delete', isLoggedIn, controller.deleteTweet);
+router.post('/', isLoggedIn, controller.createTweet); // 트윗 작성
+router.post('/comment', isLoggedIn, controller.addCommentTweet); // 답글 작성
+router.post('/retweet', isLoggedIn, controller.doRetweet); // 리트윗하기
+router.post('/like', isLoggedIn, controller.doLike); // 마음에 들어요하기
 
-router.patch('/do-retweet', isLoggedIn, controller.doRetweet);
-router.patch('/undo-retweet', isLoggedIn, controller.unDoRetweet);
-
-router.patch('/do-like', isLoggedIn, controller.doLike);
-router.patch('/undo-like', isLoggedIn, controller.unDoLike);
-
-router.patch('/delete-comment', isLoggedIn, controller.deleteCommentTweet);
+router.delete('/', isLoggedIn, controller.deleteTweet); // 트윗 삭제
+router.delete('/retweet/:tweet_id', isLoggedIn, controller.unDoRetweet); // 리트윗 취소하기
+router.delete('/like/:tweet_id', isLoggedIn, controller.unDoLike); // 마음에 들어요 취소하기
+router.delete(
+  '/comment/:orig_tweet_id/:comment_tweet_id',
+  isLoggedIn,
+  controller.deleteCommentTweet
+); // 답글 삭제
 
 export default router;

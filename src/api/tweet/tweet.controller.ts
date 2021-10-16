@@ -8,6 +8,7 @@ export default class TweetController {
   constructor(private tweetService: ITweetService) {
     this.createQuery = this.createQuery.bind(this);
 
+    this.getTweet = this.getTweet.bind(this);
     this.createTweet = this.createTweet.bind(this);
     this.deleteTweet = this.deleteTweet.bind(this);
     this.doRetweet = this.doRetweet.bind(this);
@@ -42,6 +43,18 @@ export default class TweetController {
     }
     return query;
   }
+
+  async getTweet(req: Request, res: Response) {
+    try {
+      Debugger.log('트윗 읽기 시작: ', req.params);
+      const tweet_id: number = parseInt(req.params.tweet_id);
+      const response = await this.tweetService.getTweet(tweet_id);
+      return res.json(response);
+    } catch (error) {
+      Debugger.error(error);
+      return res.status(error.status).send(error.message);
+    }
+  }
   async createTweet(req: Request, res: Response) {
     // @ts-ignore
     const user_id: IUser['user_id'] = req.user?.user_id;
@@ -59,9 +72,9 @@ export default class TweetController {
     }
   }
   async deleteTweet(req: Request, res: Response) {
-    const { tweet_id } = req.body;
+    const { tweet_id } = req.params;
     try {
-      await this.tweetService.deleteTweet(tweet_id);
+      await this.tweetService.deleteTweet(parseInt(tweet_id));
       return res.send('delete success');
     } catch (error) {
       Debugger.error(error.message);
@@ -86,13 +99,13 @@ export default class TweetController {
     }
   }
   async unDoRetweet(req: Request, res: Response) {
-    const { tweet_id } = req.body;
+    const { tweet_id } = req.params;
     // @ts-ignore
     const user_id: IUser['user_id'] = req.user?.user_id;
     // const user_id = 'testID';
     try {
       await this.tweetService.unDoRetweet({
-        tweet_id,
+        tweet_id: parseInt(tweet_id),
         user_id,
       });
       return res.send('unDoRetweet success');
@@ -119,13 +132,13 @@ export default class TweetController {
     }
   }
   async unDoLike(req: Request, res: Response) {
-    const { tweet_id } = req.body;
+    const { tweet_id } = req.params;
     // @ts-ignore
     const user_id: IUser['user_id'] = req.user?.user_id;
     // const user_id = 'testID';
     try {
       await this.tweetService.unDoLike({
-        tweet_id,
+        tweet_id: parseInt(tweet_id),
         user_id,
       });
       return res.send('unDoLike success');
@@ -143,7 +156,7 @@ export default class TweetController {
     const { target_tweet_id } = req.body;
     const query = this.createQuery(req, user_id);
     try {
-      const newCommentTweet = await this.tweetService.addCommentTweet({
+      const newCommentTweet = await this.tweetService.addComment({
         tweet: query,
         target_tweet_id,
       });
@@ -154,17 +167,17 @@ export default class TweetController {
     }
   }
   async deleteCommentTweet(req: Request, res: Response) {
-    const { orig_tweet_id, comment_tweet_id } = req.body;
+    const { orig_tweet_id, comment_tweet_id } = req.params;
 
     try {
       // @ts-ignore
       const user_id: IUser['user_id'] = req.user?.user_id;
       // const user_id = 'testID';
-      await this.tweetService.deleteCommentTweet(
-        orig_tweet_id,
-        comment_tweet_id,
-        user_id
-      );
+      await this.tweetService.deleteComment({
+        orig_tweet_id: parseInt(orig_tweet_id),
+        comment_tweet_id: parseInt(comment_tweet_id),
+        comment_writer_id: user_id,
+      });
       return res.send('delete comment_tweet');
     } catch (error) {
       return res.status(error.status).send(error.message);

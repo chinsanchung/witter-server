@@ -6,6 +6,8 @@ import {
   ICreateDto,
   ITweetActionDto,
   ICommentDto,
+  IGetTweetsResponseDto,
+  IDeleteCommentDto,
   ITweetService,
 } from './tweet.interface';
 
@@ -22,15 +24,55 @@ export default class TweetService implements ITweetService {
     this.addTweetToTimeLine = this.addTweetToTimeLine.bind(this);
     this.deleteTweetFromTimeLine = this.deleteTweetFromTimeLine.bind(this);
 
+    this.getTweet = this.getTweet.bind(this);
     this.createTweet = this.createTweet.bind(this);
     this.deleteTweet = this.deleteTweet.bind(this);
     this.doRetweet = this.doRetweet.bind(this);
     this.unDoRetweet = this.unDoRetweet.bind(this);
     this.doLike = this.doLike.bind(this);
     this.unDoLike = this.unDoLike.bind(this);
-    this.addCommentTweet = this.addCommentTweet.bind(this);
-    this.deleteCommentTweet = this.deleteCommentTweet.bind(this);
+    this.addComment = this.addComment.bind(this);
+    this.deleteComment = this.deleteComment.bind(this);
   }
+  // 트윗을 읽어오는데 활용합니다.
+  private getUserInfoQuery = {
+    $lookup: {
+      from: 'users',
+      let: { writer_id: '$user_id' },
+      pipeline: [
+        { $match: { $expr: { $eq: ['$user_id', '$$writer_id'] } } },
+        {
+          $project: {
+            _id: 0,
+            name: '$name',
+            user_id: '$user_id',
+            profile_color: '$profile_color',
+            description: '$description',
+            follower: '$follower',
+            following: '$following',
+            follower_count: { $size: '$follower' },
+            following_count: { $size: '$following' },
+          },
+        },
+      ],
+      as: 'user',
+    },
+  };
+  private setDateAndCountQuery = {
+    $set: {
+      create_date: {
+        $dateToString: {
+          format: '%H:%M · %Y년 %m월 %d일',
+          timezone: '+09:00',
+          date: '$create_date',
+        },
+      },
+      retweet_count: { $size: '$retweet' },
+      like_count: { $size: '$like' },
+      comments_count: { $size: '$comments' },
+    },
+  };
+  // 트윗을 작성하는데 활용합니다.
   private async checkTweetExistence(tweet_id: number): Promise<boolean> {
     const response = await TweetModel.findOne({ tweet_id })
       .select('tweet_id')
@@ -81,6 +123,35 @@ export default class TweetService implements ITweetService {
     }
   }
 
+  async getTweet(tweet_id: number): Promise<IGetTweetsResponseDto> {
+    // 트윗 하나를 클릭했을 때 해당 트윗과 답글들을 출력합니다.
+    try {
+      const originalTweet = await TweetModel.aggregate([
+        { $match: { tweet_id } },
+        this.getUserInfoQuery,
+        this.setDateAndCountQuery,
+        { $unwind: '$user' },
+      ]);
+      // Debugger.log('오리지널', originalTweet);
+      if (originalTweet.length > 0 && originalTweet[0].is_active) {
+        const comments = await TweetModel.aggregate([
+          { $match: { tweet_id: { $in: originalTweet[0].comments } } },
+          this.getUserInfoQuery,
+          this.setDateAndCountQuery,
+          { $unwind: '$user' },
+          { $sort: { create_date: 1 } },
+        ]);
+        return {
+          origin: originalTweet[0],
+          comments,
+        };
+      } else {
+        throw createError(404, '존재하지 않는 트윗입니다.');
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
   async createTweet(tweet: ICreateDto): Promise<ITweet> {
     try {
       // Debugger.log('서비스에서 트윗 생성');
@@ -208,10 +279,7 @@ export default class TweetService implements ITweetService {
     }
   }
 
-  async addCommentTweet({
-    tweet,
-    target_tweet_id,
-  }: ICommentDto): Promise<ITweet> {
+  async addComment({ tweet, target_tweet_id }: ICommentDto): Promise<ITweet> {
     try {
       const isExistTweet = await this.checkTweetExistence(target_tweet_id);
       if (isExistTweet) {
@@ -235,11 +303,11 @@ export default class TweetService implements ITweetService {
       throw error;
     }
   }
-  async deleteCommentTweet(
-    orig_tweet_id: number,
-    comment_tweet_id: number,
-    comment_writer_id: string
-  ): Promise<void> {
+  async deleteComment({
+    orig_tweet_id,
+    comment_tweet_id,
+    comment_writer_id,
+  }: IDeleteCommentDto): Promise<void> {
     try {
       const response = await TweetModel.findOneAndUpdate(
         { tweet_id: orig_tweet_id },
