@@ -18,8 +18,6 @@ dotenv.config();
 
 export default class App {
   private app: express.Application;
-  // private PORT: number = process.env.NODE_ENV === 'production' ? 80 : 5000;
-  // private PORT: number = 80;
   private PORT = process.env.PORT || 5000;
   private RedisStore: connectRedis.RedisStore;
   private redisClient: redis.RedisClient;
@@ -41,12 +39,11 @@ export default class App {
         res: express.Response,
         next: express.NextFunction
       ) => {
-        morgan('combined')(req, res, next);
-        // if (process.env.NODE_ENV === 'production') {
-        //   morgan('combined')(req, res, next);
-        // } else {
-        //   morgan('dev')(req, res, next);
-        // }
+        if (process.env.NODE_ENV === 'development') {
+          morgan('dev')(req, res, next);
+        } else {
+          morgan('combined')(req, res, next);
+        }
       }
     );
     this.app.use(
@@ -80,9 +77,6 @@ export default class App {
 
   private setRoutes = (): void => {
     this.app.use('/api', routes);
-    // for (const route of routesList) {
-    //   this.app.use(route.path, route.router);
-    // }
   };
 
   public initialize = (): void => {
@@ -91,16 +85,15 @@ export default class App {
         this.setApplication();
         this.setRoutes();
 
-        // if (process.env.NODE_ENV === 'production') {
-        //   this.app.use(express.static(path.join(__dirname, '../client_build')));
-        //   this.app.get('/', (req, res) => {
-        //     res.sendFile(path.join(__dirname, '../client_build', 'index.html'));
-        //   });
-        // }
-        this.app.use(express.static(path.join(__dirname, '../client_build')));
-        this.app.get('*', (req, res) => {
-          res.sendFile(path.join(__dirname, '../client_build', 'index.html'));
-        });
+        if (process.env.NODE_ENV === 'development') {
+          Debugger.log('Developement Mode');
+        } else {
+          this.app.use(express.static(path.join(__dirname, '../client_build')));
+          this.app.get('*', (req, res) => {
+            res.sendFile(path.join(__dirname, '../client_build', 'index.html'));
+          });
+        }
+
         this.app.listen(this.PORT, () =>
           Debugger.log(`포트 ${this.PORT}. 서버 시작`)
         );
