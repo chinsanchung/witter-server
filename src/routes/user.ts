@@ -6,11 +6,13 @@ import UserService from '../api/user/user.service';
 const controller = new UserController(new UserService());
 const router = express.Router();
 
-router.get('/follower-list', controller.getFollowerList);
-router.get('/following-list', controller.getFollowingList);
-router.patch('/change-profile', isLoggedIn, controller.changeProfile);
+router.get('/follower-list', controller.getFollowerList); // 팔로워 목록 출력하기
+router.get('/following-list', controller.getFollowingList); // 팔로잉 목록 출력하기
 
-router.patch('/follow-user', isLoggedIn, controller.followUser);
-router.patch('/unfollow-user', isLoggedIn, controller.unFollowUser);
+router.post('/', controller.join); // 회원가입
+
+router.patch('/', isLoggedIn, controller.changeProfile); // 사용자 프로필 설정
+router.patch('/follow', isLoggedIn, controller.followUser); // 팔로우하기
+router.patch('/unfollow', isLoggedIn, controller.unFollowUser); // 팔로우 취소하기
 
 export default router;
