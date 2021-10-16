@@ -1,44 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
-import bcrypt from 'bcrypt';
 import passport from 'passport';
-import { IAuthService, JoinDto } from './auth.interface';
 import Debugger from '../../utils/debugger';
 import { IUser } from '../../models/User';
 
 export default class AuthController {
-  private saltRound: number = 7;
-  constructor(private authService: IAuthService) {
-    this.convertPassword = this.convertPassword.bind(this);
-
-    this.join = this.join.bind(this);
+  constructor() {
     this.login = this.login.bind(this);
     this.logout = this.logout.bind(this);
     this.tokenRefresh = this.tokenRefresh.bind(this);
   }
-  private convertPassword(password: string): string {
-    const bcryptedPassword = bcrypt.hashSync(password, this.saltRound);
-    return bcryptedPassword;
-  }
 
-  async join(req: Request, res: Response) {
-    const { email, password, name, user_id, profile_color }: JoinDto = req.body;
-    Debugger.log(req.body);
-    try {
-      const newPassword: string = this.convertPassword(password);
-      await this.authService.join({
-        email,
-        password: newPassword,
-        name,
-        user_id,
-        join_date: new Date(),
-        profile_color,
-      });
-      return res.send('success');
-    } catch (error) {
-      Debugger.error(error);
-      return res.status(error?.status).send(error?.message);
-    }
-  }
   login(req: Request, res: Response, next: NextFunction) {
     Debugger.log('로그인 시작');
     passport.authenticate(

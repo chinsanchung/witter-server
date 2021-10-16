@@ -1,14 +1,12 @@
 import express from 'express';
 import { isLoggedIn } from '../middlewares/authority';
 import AuthController from '../api/auth/auth.controller';
-import AuthService from '../api/auth/auth.service';
 
-const controller = new AuthController(new AuthService());
+const controller = new AuthController();
 const router = express.Router();
 
-router.get('/logout', isLoggedIn, controller.logout);
-router.post('/join', controller.join);
 router.post('/login', controller.login);
-router.post('/token-refresh', isLoggedIn, controller.tokenRefresh);
+router.post('/logout', isLoggedIn, controller.logout);
+router.get('/token', isLoggedIn, controller.tokenRefresh); // 새로고침시 사용자 정보 불러오기
 
 export default router;
