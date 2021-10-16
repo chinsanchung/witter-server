@@ -82,3 +82,17 @@ This is probably not a problem with npm. There is likely additional logging outp
 - 홈 타임라인에서 사용한 중복을 제거하는 aggregate 문 일부를 변수로 추출했고, 사용자 페이지의 타임라인 aggregate 쿼리에 추가해 트윗의 중복을 제거하도록 했습니다.
 - PORT 설정을 변경하고 클라이언트의 baseURL 을 변경했습니다. heroku 는 dynamic port 를 제공하기 떄문에 빌드 버전의 port 를 고정값으로 하면 안된다고 합니다. [출처](https://stackoverflow.com/a/52992592)
   - 그래서 app.tsx 의 PORT 설정을 `process.env.PORT || 5000;`으로, 클라이언트 defaults.baseURL 을 `/api`으로 수정했습니다.
+
+### 10/15
+
+- 서비스, 컨트롤러의 메소드를 화살표 함수 대신 일반 함수로 변경했습니다.
+
+### 10/16
+
+- REST API 디자인 가이드에 맞게 URI, HTTP 메소드를 재설계하고, 주요 목적에 맞게 몇몇 기능을 옮겼습니다.
+  - 도입부 URI 를 복수형 명사로 수정했습니다. 그리고 reading URI 를 timelines 으로 수정했습니다.
+  - auth 에 있던 회원가입 기능을 users 로 이전했습니다. 그에 따라 필요가 없어진 auth.interface.ts, auth.service.ts 를 삭제했습니다.
+  - timelines(이전에는 reading)에 있던 getTweets 를 tweets 으로 이전하고 이름을 getTweet 으로 바꿨습니다. URI 와 HTTP 메소드를 가이드에 맞게 수정했습니다.
+  - tweets 의 모든 기능들의 URI 와 HTTP 메소드를 가이드에 맞게 수정했습니다.
+  - users 의 모든 기능들의 URI 와 HTTP 메소드를 가이드에 맞게 수정했습니다.
+- API 의 URI, HTTP 메소드의 수정으로 인해 클라이언트의 API 호출 함수도 전부 수정했습니다.
