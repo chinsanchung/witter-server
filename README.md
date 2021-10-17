@@ -69,33 +69,33 @@ project
 
 - auth: 로그인, 회원가입 등 사용자의 인증과 관련이 있는 기능입니다.
 - tweet: 트윗 생성, 삭제 그리고 트윗과 관련된 기능들(리트윗, 마음에 들어요, 답글)을 다룹니다.
-- reading: 트윗들을 모은 타임라인을 읽는 역할입니다. 로그인한 사용자의 홈 타임라인, 특정 사용자의 타임라인, 그리고 특정 트윗을 읽는 기능을 다룹니다.
+- timelines: 트윗들을 모은 타임라인을 읽는 역할입니다. 로그인한 사용자의 홈 타임라인, 특정 사용자의 타임라인을 가져옵니다.
 - user: 프로필 조회와 수정, 비밀번호 변경 등 사용자의 정보를 다루는 기능입니다. [진행중]
 
 API 를 설계할 때 Node 프레임워크 [NestJS](https://nestjs.com/)를 참고해서 작성했습니다.
 
 ## API 목록
 
-- GET `auth/logout`
-- POST `auth/join`
-- POST `auth/login`
-- POST `auth/token-refresh`
+- POST `/auth/login` : 로그인
+- POST `/auth/logout` : 로그아웃
+- GET `/auth/token` : 새로고침 시 사용자 정보 불러오기
 
-- POST `tweet/create`
-- POST `tweet/add-comment`
-- PATCH `tweet/delete`
-- PATCH `tweet/do-retweet`
-- PATCH `tweet/undo-retweet`
-- PATCH `tweet/do-like`
-- PATCH `tweet/undo-like`
-- PATCH `tweet/delete-comment`
+- GET `/tweets` : 트윗과 답글 조회
+- POST `/tweets` : 트윗 작성
+- POST `/tweets/comment` : 답글 작성
+- POST `/tweets/retweet` : 리트윗하기
+- POST `/tweets/like` : 마음에 들어요하기
+- DELETE `/tweets` : 트윗 삭제
+- DELETE `/tweets/retweet/:tweet_id` : 리트윗 취소하기
+- DELETE `/tweets/like/:tweet_id` : 마음에 들어요 취소하기
+- DELETE `/tweets/comment/:orig_tweet_id/:comment_tweet_id` : 답글 삭제
 
-- GET `reading/home`
-- GET `reading/timeline/:userid`
-- GET `reading/:tweetid`
+- GET `/timelines` : 홈 타임라인 출력하기
+- GET `/timelines/:user_id` : 특정 사용자의 타임라인 출력하기
 
-- GET `user/follower-list`
-- GET `user/following-list`
-- GET `user/check-email-duplicate`
-- GET `user/check-id-duplicate`
-- PATCH `user/change-profile`
+- GET `/users/follower-list` : 팔로워 목록 출력하기
+- GET `/users/following-list` : 팔로잉 목록 출력하기
+- POST `/users` : 회원가입
+- PATCH `users` : 사용자 프로필 설정
+- PATCH `users/follow` : 팔로우하기
+- PATCH `users/unfollow` : 팔로우 취소하기
