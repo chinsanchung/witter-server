@@ -26,6 +26,7 @@ export interface IUserService {
   getFollowerList(user_id: string): Promise<IUser[]>;
   getFollowingList(user_id: string): Promise<IUser[]>;
   changeProfile({
+    user_id,
     name,
     description,
     profile_color,
