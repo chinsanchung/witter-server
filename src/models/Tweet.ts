@@ -1,11 +1,8 @@
 import { Schema, model } from 'mongoose';
-import { mediaSchema, IMedia } from './mediaSchema';
 
 interface ITweet {
   tweet_id: number;
   user_id: string; // 작성자의 id
-  image: IMedia[];
-  video: IMedia;
   contents: string; // 문장
   create_date: Date;
   retweet: string[]; // 리트윗한 사용자의 id 목록
@@ -17,8 +14,6 @@ interface ITweet {
 const schema = new Schema<ITweet>({
   tweet_id: { type: Number, required: true },
   user_id: { type: String, ref: 'users', required: true },
-  image: { type: [mediaSchema], default: null },
-  video: { type: mediaSchema, default: null },
   contents: { type: String, default: '' },
   create_date: { type: Date, required: true },
   retweet: { type: [String], ref: 'users', default: [] },
