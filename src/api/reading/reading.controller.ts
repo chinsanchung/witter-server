@@ -12,7 +12,11 @@ export default class ReadingController {
     try {
       Debugger.log('특정 사용자의 타임라인 읽기 시작', req.params);
       const user_id: string = req.params.user_id;
-      const response = await this.readingService.getUserTimeLine(user_id);
+      const page: string = req.query.page as string;
+      const response = await this.readingService.getUserTimeLine({
+        user_id,
+        page: parseInt(page) - 1,
+      });
       return res.json(response);
     } catch (error) {
       Debugger.error(error);
@@ -23,12 +27,14 @@ export default class ReadingController {
   async getHomeTimeLine(req: Request, res: Response) {
     try {
       // @ts-ignore
-      const { user_id, following }: IUser = req.user;
-      // const user_id = 'testID';
-      // const following = ['NASA'];
+      // const { user_id, following }: IUser = req.user;
+      const user_id = 'testID';
+      const following = ['NASA'];
+      const page: string = req.query.page as string;
       const response = await this.readingService.getHomeTimeLine({
         user_id,
         following,
+        page: parseInt(page) - 1,
       });
       return res.json(response);
     } catch (error) {

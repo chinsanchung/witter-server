@@ -2,7 +2,11 @@ import { ITweet } from '../../models/Tweet';
 import { TimeLineModel } from '../../models/TimeLine';
 import { UserModel } from '../../models/User';
 import createError from '../../utils/createError';
-import { IReadingService, IGetUserTimeLineDto } from './reading.interface';
+import {
+  IReadingService,
+  IGetUserTimeLineDto,
+  IGetTimeLineDto,
+} from './reading.interface';
 
 export default class ReadingService implements IReadingService {
   constructor() {
@@ -29,19 +33,24 @@ export default class ReadingService implements IReadingService {
       },
     },
   ];
-  private getTweetsFromTimeLineQuery = {
+  private projectListQuery = {
+    $project: {
+      user_id: 1,
+      tweet_id: '$tweet_list.tweet_id',
+      is_retweet: '$tweet_list.is_retweet',
+      register_date: '$tweet_list.register_date',
+    },
+  };
+  private lookupTweetQuery = {
     $lookup: {
       from: 'tweets',
-      let: { tweet_id: '$tweet_list.tweet_id' },
+      let: { tweet_id: '$tweet_id' },
       pipeline: [
         { $match: { $expr: { $eq: ['$tweet_id', '$$tweet_id'] } } },
         {
           $project: {
             _id: 0,
-            tweet_id: '$tweet_id',
             user_id: '$user_id',
-            image: '$image',
-            video: '$video',
             contents: '$contents',
             create_date: '$create_date',
             retweet: '$retweet',
@@ -56,24 +65,24 @@ export default class ReadingService implements IReadingService {
     },
   };
   private projectTweetQuery = {
-    _id: 0,
-    user_id: '$user_id',
-    writer_id: '$tweet.user_id',
-    tweet_id: '$tweet.tweet_id',
-    video: '$tweet.video',
-    image: '$tweet.image',
-    contents: '$tweet.contents',
-    create_date: '$tweet.create_date',
-    retweet: '$tweet.retweet',
-    retweet_count: '$tweet.retweet_count',
-    like: '$tweet.like',
-    like_count: '$tweet.like_count',
-    comments: '$tweet.comments',
-    comments_count: '$tweet.comments_count',
-    is_retweet: '$tweet_list.is_retweet',
-    register_date: '$tweet_list.register_date',
+    $project: {
+      _id: 0,
+      user_id: '$user_id',
+      writer_id: '$tweet.user_id',
+      tweet_id: 1,
+      contents: '$tweet.contents',
+      create_date: '$tweet.create_date',
+      retweet: '$tweet.retweet',
+      retweet_count: '$tweet.retweet_count',
+      like: '$tweet.like',
+      like_count: '$tweet.like_count',
+      comments: '$tweet.comments',
+      comments_count: '$tweet.comments_count',
+      is_retweet: '$tweet_list.is_retweet',
+      register_date: '$tweet_list.register_date',
+    },
   };
-  private removeDuplicateFromTimeLine = [
+  private removeDuplicateTweetQuery = [
     {
       $group: {
         _id: '$tweet_id',
@@ -83,22 +92,9 @@ export default class ReadingService implements IReadingService {
     { $project: { data: { $first: '$orig' } } },
     {
       $project: {
-        user_id: '$data.user_id',
-        writer_id: '$data.writer_id',
         tweet_id: '$data.tweet_id',
-        video: '$data.video',
-        image: '$data.image',
-        contents: '$data.contents',
-        create_date: '$data.create_date',
-        retweet: '$data.retweet',
-        retweet_count: '$data.retweet_count',
-        like: '$data.like',
-        like_count: '$data.like_count',
-        comments: '$data.comments',
-        comments_count: '$data.comments_count',
         is_retweet: '$data.is_retweet',
         register_date: '$data.register_date',
-        user: '$data.user',
       },
     },
   ];
@@ -129,22 +125,23 @@ export default class ReadingService implements IReadingService {
     };
   }
 
-  async getUserTimeLine(user_id: string): Promise<IGetUserTimeLineDto> {
+  async getUserTimeLine({
+    user_id,
+    page,
+  }: IGetTimeLineDto): Promise<IGetUserTimeLineDto> {
     try {
       const response = await TimeLineModel.aggregate([
         { $match: { user_id } },
         { $unwind: '$tweet_list' },
-        this.getTweetsFromTimeLineQuery,
-        { $unwind: '$tweet' },
-        {
-          $project: {
-            ...this.projectTweetQuery,
-          },
-        },
-        this.getUserInfoQuery('writer_id'),
-        { $unwind: '$user' },
-        ...this.removeDuplicateFromTimeLine,
+        this.projectListQuery,
+        ...this.removeDuplicateTweetQuery,
         { $sort: { register_date: -1 } },
+        { $skip: page * this.TIMELINE_LIMIT },
+        { $limit: this.TIMELINE_LIMIT },
+        this.lookupTweetQuery,
+        { $unwind: '$tweet' },
+        this.projectTweetQuery,
+        this.getUserInfoQuery('writer_id'),
       ]);
       const userSelectWord: string =
         'name user_id profile_color description follower following';
@@ -175,7 +172,7 @@ export default class ReadingService implements IReadingService {
       const response = await TimeLineModel.aggregate([
         { $match: { user_id } },
         { $unwind: '$like_list' },
-        this.getTweetsFromTimeLineQuery,
+        this.lookupTweetQuery,
         { $unwind: '$tweet' },
         {
           $project: {
@@ -198,25 +195,22 @@ export default class ReadingService implements IReadingService {
   async getHomeTimeLine({
     user_id,
     following,
-  }: {
-    user_id: string;
-    following: string[];
-  }): Promise<ITweet[]> {
+    page,
+  }: IGetTimeLineDto): Promise<ITweet[]> {
     try {
       const response = await TimeLineModel.aggregate([
         { $match: { user_id: { $in: [...following, user_id] } } },
         { $unwind: '$tweet_list' },
-        this.getTweetsFromTimeLineQuery,
+        this.projectListQuery,
+        ...this.removeDuplicateTweetQuery,
+        { $sort: { register_date: -1 } },
+        { $skip: page * this.TIMELINE_LIMIT },
+        { $limit: this.TIMELINE_LIMIT },
+        this.lookupTweetQuery,
         { $unwind: '$tweet' },
-        {
-          $project: {
-            ...this.projectTweetQuery,
-          },
-        },
+        this.projectTweetQuery,
         this.getUserInfoQuery('writer_id'),
         { $unwind: '$user' },
-        ...this.removeDuplicateFromTimeLine,
-        { $sort: { register_date: -1 } },
       ]);
 
       if (response.length > 0) {
