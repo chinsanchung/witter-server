@@ -96,3 +96,8 @@ This is probably not a problem with npm. There is likely additional logging outp
   - tweets 의 모든 기능들의 URI 와 HTTP 메소드를 가이드에 맞게 수정했습니다.
   - users 의 모든 기능들의 URI 와 HTTP 메소드를 가이드에 맞게 수정했습니다.
 - API 의 URI, HTTP 메소드의 수정으로 인해 클라이언트의 API 호출 함수도 전부 수정했습니다.
+
+### 10/24
+
+- 무한스크롤 구현작업 시작
+  - 타임라인의 쿼리문을 정렬 후 10개씩 제한을 준 다음에야 트윗과 사용자 데이터를 연결시켜 불러오도록 수정했습니다. 그리고 쿼리문 변수의 이름을 수정했습니다.
