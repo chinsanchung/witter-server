@@ -3,16 +3,16 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
-import createError from './utils/createError';
+import createError from '../utils/createError';
 import cors from 'cors';
 import redis from 'redis';
 import connectRedis from 'connect-redis';
 import passport from 'passport';
 import path from 'path';
-import PassportConfig from './middlewares/passportConfig';
-import Debugger from './utils/debugger';
-import Database from './middlewares/database';
-import routes from './routes';
+import PassportConfig from './passportConfig';
+import Debugger from '../utils/debugger';
+import Database from './database';
+import routes from '../routes';
 
 dotenv.config();
 

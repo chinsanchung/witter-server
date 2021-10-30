@@ -101,3 +101,7 @@ This is probably not a problem with npm. There is likely additional logging outp
 
 - 무한스크롤 구현작업 시작
   - 타임라인의 쿼리문을 정렬 후 10개씩 제한을 준 다음에야 트윗과 사용자 데이터를 연결시켜 불러오도록 수정했습니다. 그리고 쿼리문 변수의 이름을 수정했습니다.
+
+### 10/30
+
+- app.ts, database.ts, passportConfig.ts 를 core 폴더에 옮겼습니다. 앱, 데이터베이스, 그리고 사용자 인증을 Node.js 서버의 핵심이라고 생각했기 때문입니다.
