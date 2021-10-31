@@ -27,15 +27,15 @@ export default class ReadingController {
   async getHomeTimeLine(req: Request, res: Response) {
     try {
       // @ts-ignore
-      // const { user_id, following }: IUser = req.user;
-      const user_id = 'testID';
-      const following = ['NASA'];
+      const { user_id, following }: IUser = req.user;
       const page: string = req.query.page as string;
+      // Debugger.log('PAGEINDEX: ', page);
       const response = await this.readingService.getHomeTimeLine({
         user_id,
         following,
-        page: parseInt(page) - 1,
+        page: parseInt(page),
       });
+      Debugger.log('PAGEINDEX: ', page, ' RES: ', response.length);
       return res.json(response);
     } catch (error) {
       Debugger.error(error);
