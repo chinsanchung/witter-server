@@ -7,6 +7,7 @@ import {
   IGetUserTimeLineDto,
   IGetTimeLineDto,
 } from './reading.interface';
+import Debugger from '../../utils/debugger';
 
 export default class ReadingService implements IReadingService {
   constructor() {
@@ -216,7 +217,9 @@ export default class ReadingService implements IReadingService {
       if (response.length > 0) {
         return response;
       } else {
-        throw createError(404, '타임라인에 트윗이 없습니다.');
+        // throw createError(404, '타임라인에 트윗이 없습니다.');
+        Debugger.log('타임라인에 트윗이 없습니다.');
+        return [];
       }
     } catch (error) {
       throw error;
