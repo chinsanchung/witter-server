@@ -5,10 +5,8 @@ import { IUserForTweetDto } from '../reading/reading.interface';
 export interface ICreateDto {
   readonly tweet_id: number;
   readonly user_id: string; // 작성자의 id
-  image?: IMedia[];
-  video?: IMedia;
   readonly contents: string; // 문장
-  readonly create_date: Date;
+  readonly create_date?: Date;
   readonly comments?: number[]; // 해당 트윗에 답글 트윗을 단 tweet_id 목록
 }
 
