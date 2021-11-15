@@ -88,9 +88,13 @@ export default class App {
         if (process.env.NODE_ENV === 'development') {
           Debugger.log('Developement Mode');
         } else {
-          this.app.use(express.static(path.join(__dirname, '../client_build')));
+          this.app.use(
+            express.static(path.join(__dirname, '../../client_build'))
+          );
           this.app.get('*', (req, res) => {
-            res.sendFile(path.join(__dirname, '../client_build', 'index.html'));
+            res.sendFile(
+              path.join(__dirname, '../../client_build', 'index.html')
+            );
           });
         }
 
