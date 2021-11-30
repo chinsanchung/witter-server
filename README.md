@@ -1,9 +1,11 @@
-# Twitter Clone Server
+# Witter Server
 
-트위터를 참고해서 백엔드 기능을 구현했습니다. 사용한 기술은 아래와 같습니다.
+트위터의 일부 기능을 구현한 백엔드 애플리케이션입니다. 헤로쿠를 통해 배포했으며 주소는 [https://witterclone.herokuapp.com](https://witterclone.herokuapp.com)입니다.
+
+## 개발 환경
 
 - 언어: TypeScript
-- 주요 라이브러리, 프레임워크: Express, mongoose, passport, passport-local
+- 사용 : Express, mongoose, passport, passport-local
 
 ## 폴더 구조
 
