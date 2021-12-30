@@ -49,48 +49,6 @@ describe('UsersService', () => {
         httpStatus: 400,
       });
     });
-    it('실패: user_id 글자 수', async () => {
-      const errorInfo = {
-        ok: false,
-        error: 'user_id: 5 ~ 12 글자로 입력해주세요.',
-        httpStatus: 400,
-      };
-      usersRepository.findOne.mockResolvedValue(null);
-      usersRepository.create.mockRejectedValue(errorInfo);
-      try {
-        await service.createUser({ ...userInput, user_id: 't' });
-      } catch (e) {
-        expect(e.response).toBe(errorInfo.error);
-      }
-    });
-    it('실패: password 글자 수', async () => {
-      const errorInfo = {
-        ok: false,
-        error: 'password: 5 ~ 20 글자로 입력해주세요.',
-        httpStatus: 400,
-      };
-      usersRepository.findOne.mockResolvedValue(null);
-      usersRepository.create.mockRejectedValue(errorInfo);
-      try {
-        await service.createUser({ ...userInput, password: 't' });
-      } catch (e) {
-        expect(e.response).toBe(errorInfo.error);
-      }
-    });
-    it('실패: description 글자 수', async () => {
-      const errorInfo = {
-        ok: false,
-        error: 'description: 5 ~ 12 글자로 입력해주세요.',
-        httpStatus: 400,
-      };
-      usersRepository.findOne.mockResolvedValue(null);
-      usersRepository.create.mockRejectedValue(errorInfo);
-      try {
-        await service.createUser({ ...userInput, description: 'a'.repeat(51) });
-      } catch (e) {
-        expect(e.response).toBe(errorInfo.error);
-      }
-    });
     it('성공: 유저 생성', async () => {
       usersRepository.findOne.mockResolvedValue(null);
       usersRepository.create.mockReturnValue(userInput);
