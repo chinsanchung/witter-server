@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -12,6 +13,10 @@ const mockRepository = () => ({
 const mockJwtService = () => ({
   sign: jest.fn(),
 });
+const mockConfigService = () => ({
+  get: jest.fn(),
+});
+
 const mockResponse = httpMocks.createResponse();
 
 describe('AuthController', () => {
@@ -30,6 +35,10 @@ describe('AuthController', () => {
         {
           provide: JwtService,
           useValue: mockJwtService(),
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService(),
         },
       ],
     }).compile();
