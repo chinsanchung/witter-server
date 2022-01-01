@@ -1,18 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { User } from 'src/entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
-jest.mock('bcrypt');
-
 const mockRepository = () => ({
   findOne: jest.fn(),
 });
 const mockJwtService = () => ({
-  sign: jest.fn(),
+  sign: jest.fn(() => 'signed-token'),
 });
 
 type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
@@ -55,15 +52,21 @@ describe('AuthService', () => {
         ...defaultErrorOutput,
         error: '존재하지 않는 계정입니다.',
       };
-      usersRepository.findOne.mockResolvedValue(undefined);
-      service.checkUserValidAndReturnUser.mockResolvedValue({
-        ok: false,
-        error: errorOutput.error,
-      });
+      usersRepository.findOne.mockResolvedValue(null);
+      jest
+        .spyOn(service, 'checkLoginValidtionAndReturnUser')
+        .mockResolvedValue({
+          ...defaultErrorOutput,
+          error: errorOutput.error,
+        });
 
       const result = await service.login(loginInput);
 
-      expect(result).toMatchObject(errorOutput);
+      expect(service.checkLoginValidtionAndReturnUser).toHaveBeenCalledTimes(1);
+      expect(service.checkLoginValidtionAndReturnUser).toHaveBeenCalledWith(
+        loginInput,
+      );
+      expect(result).toEqual(errorOutput);
     });
 
     it('실패 - 비밀번호가 일치하지 않는 경우', async () => {
@@ -73,44 +76,57 @@ describe('AuthService', () => {
         error: '비밀번호가 일치하지 않습니다.',
       };
       usersRepository.findOne.mockResolvedValue(mockUser);
-      jest.spyOn(bcrypt, 'compare').mockImplementation(async () => false);
-      service.checkUserValidAndReturnUser.mockResolvedValue({
-        ok: false,
-        error: errorOutput.error,
-      });
+      jest
+        .spyOn(service, 'checkLoginValidtionAndReturnUser')
+        .mockResolvedValue({
+          ...defaultErrorOutput,
+          error: errorOutput.error,
+        });
 
       const result = await service.login(loginInput);
 
-      expect(bcrypt.compare).toHaveBeenCalled();
-      expect(bcrypt.compare).toHaveBeenCalledWith(
-        loginInput.password,
-        mockUser.password,
+      expect(service.checkLoginValidtionAndReturnUser).toHaveBeenCalledTimes(1);
+      expect(service.checkLoginValidtionAndReturnUser).toHaveBeenCalledWith(
+        loginInput,
       );
-      expect(result).toMatchObject(errorOutput);
+      expect(result).toEqual(errorOutput);
     });
 
     it('성공 - 토큰 발급', async () => {
       const loginInput = { user_id: 'testid', password: '12345' };
-      const mockUser = { ...loginInput, id: 1 };
+      const mockUser = {
+        ...loginInput,
+        id: 1,
+        created_at: new Date(),
+        hashPassword: jest.fn(),
+      };
       usersRepository.findOne.mockResolvedValue(mockUser);
-      jest.spyOn(bcrypt, 'compare').mockImplementation(async () => true);
-      service.checkUserValidAndReturnUser.mockResolvedValue({
-        ok: true,
-        data: mockUser,
-      });
+      jest
+        .spyOn(service, 'checkLoginValidtionAndReturnUser')
+        .mockResolvedValue({
+          ok: true,
+          data: mockUser,
+        });
 
       const result = await service.login(loginInput);
 
-      expect(bcrypt.compare).toHaveBeenCalled();
-      expect(bcrypt.compare).toHaveBeenCalledWith(
-        loginInput.password,
-        mockUser.password,
+      expect(service.checkLoginValidtionAndReturnUser).toHaveBeenCalledTimes(1);
+      expect(service.checkLoginValidtionAndReturnUser).toHaveBeenCalledWith(
+        loginInput,
       );
       expect(jwtService.sign).toHaveBeenCalledTimes(2);
-      expect(jwtService.sign).toHaveBeenCalledWith(mockUser);
-      expect(result).toMatchObject({
-        accessToken: 'access-token',
-        refreshToken: 'refresh-token',
+      expect(jwtService.sign).toHaveBeenCalledWith(
+        {
+          user_id: mockUser.user_id,
+        },
+        expect.any(Object),
+      );
+      expect(result).toEqual({
+        ok: true,
+        data: {
+          accessToken: 'signed-token',
+          refreshToken: 'signed-token',
+        },
       });
     });
   });
