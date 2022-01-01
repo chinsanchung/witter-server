@@ -1,6 +1,7 @@
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import * as httpMocks from 'node-mocks-http';
 import { User } from 'src/entities/user.entity';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -11,11 +12,11 @@ const mockRepository = () => ({
 const mockJwtService = () => ({
   sign: jest.fn(),
 });
+const mockResponse = httpMocks.createResponse();
 
 describe('AuthController', () => {
   let controller: AuthController;
   let service: AuthService;
-  let jwtService: JwtService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -35,7 +36,6 @@ describe('AuthController', () => {
 
     controller = module.get<AuthController>(AuthController);
     service = module.get<AuthService>(AuthService);
-    jwtService = module.get<JwtService>(JwtService);
   });
 
   it('should be defined', () => {
@@ -53,12 +53,12 @@ describe('AuthController', () => {
         error: '존재하지 않는 계정입니다.',
       };
       jest
-        .spyOn(service, 'checkUserValidAndReturnUser')
+        .spyOn(service, 'checkLoginValidtionAndReturnUser')
         .mockResolvedValue({ ok: false, error: errorOutput.error });
       jest.spyOn(service, 'login').mockResolvedValue(errorOutput);
 
       try {
-        const result = await service.login(loginInput);
+        await controller.login(mockResponse, loginInput);
       } catch (e) {
         expect(e.status).toBe(400);
         expect(e.response).toBe(errorOutput.error);
@@ -67,39 +67,38 @@ describe('AuthController', () => {
     it('실패 - 비밀번호가 일치하지 않는 경우', async () => {
       const errorOutput = {
         ...defaultErrorOutput,
-        error: '존재하지 않는 계정입니다.',
+        error: '비밀번호가 일치하지 않습니다.',
       };
 
       jest
-        .spyOn(service, 'checkUserValidAndReturnUser')
+        .spyOn(service, 'checkLoginValidtionAndReturnUser')
         .mockResolvedValue({ ok: false, error: errorOutput.error });
 
       jest.spyOn(service, 'login').mockResolvedValue(errorOutput);
 
       try {
-        const result = await service.login(loginInput);
+        await controller.login(mockResponse, loginInput);
       } catch (e) {
         expect(e.status).toBe(400);
         expect(e.response).toBe(errorOutput.error);
       }
     });
     it('성공 - 토큰 발급', async () => {
-      const tokenList = {
-        accessToken: 'access-token',
-        refreshToken: 'refresh-token',
+      const loginOutput = {
+        accessToken: 'signed-token',
+        refreshToken: 'signed-token',
       };
       jest
-        .spyOn(service, 'checkUserValidAndReturnUser')
+        .spyOn(service, 'checkLoginValidtionAndReturnUser')
         .mockResolvedValue({ ok: true });
-
       jest.spyOn(service, 'login').mockResolvedValue({
         ok: true,
-        data: tokenList,
+        data: loginOutput,
       });
 
-      const result = await service.login(loginInput);
+      const result = await controller.login(mockResponse, loginInput);
 
-      expect(result).toBe(tokenList);
+      expect(result).toEqual({ accessToken: loginOutput.accessToken });
     });
   });
 });
