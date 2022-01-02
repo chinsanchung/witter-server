@@ -34,4 +34,10 @@ export class AuthController {
     }
     throw new HttpException(error, httpStatus);
   }
+
+  @Post('/logout')
+  logout(@Res({ passthrough: true }) response: Response): string {
+    response.clearCookie('refresh-token');
+    return '로그아웃을 완료했습니다.';
+  }
 }

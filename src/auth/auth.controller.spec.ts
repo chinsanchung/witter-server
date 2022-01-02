@@ -110,4 +110,12 @@ describe('AuthController', () => {
       expect(result).toEqual({ accessToken: loginOutput.accessToken });
     });
   });
+
+  describe('logout', () => {
+    it('성공 - 로그아웃', async () => {
+      const result = controller.logout(mockResponse);
+
+      expect(result).toEqual('로그아웃을 완료했습니다.');
+    });
+  });
 });
