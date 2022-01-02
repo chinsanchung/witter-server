@@ -3,6 +3,7 @@
 그동안 수행한 작업을 정리하는 문서입니다.
 
 - [로그인](##로그인)
+- [로그아웃](##로그아웃)
 
 ---
 
@@ -63,4 +64,16 @@ it('성공 - 토큰 발급', async () => {
 
   expect(result).toEqual({ accessToken: loginOutput.accessToken });
 });
+```
+
+## 로그아웃
+
+로그아웃은 Response 객체의 `clearCookie`를 이용해 리프레시 토큰을 제거합니다. 엑세스 토큰은 클라이언트 측에서 Authorization Bearer Token 을 제거해 로그아웃을 하는 것으로 가정하고 있습니다.
+
+```typescript
+@Post('/logout')
+logout(@Res({ passthrough: true }) response: Response): string {
+  response.clearCookie('refresh-token');
+  return '로그아웃을 완료했습니다.';
+}
 ```
