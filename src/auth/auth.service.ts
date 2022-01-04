@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { IOutputWithData } from 'src/common/output.interface';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
+import { CreateTokenInputDto } from './dtos/create-token.dto';
 import { LoginInputDto, LoginOutputDto } from './dtos/login.dto';
 
 @Injectable()
@@ -89,6 +90,22 @@ export class AuthService {
       return { ok: true, data: result };
     } catch (error) {
       return { ok: false, error: 'INVALID_TOKEN' };
+    }
+  }
+
+  async createToken({
+    payload,
+    option,
+  }: CreateTokenInputDto): Promise<IOutputWithData<{ accessToken: string }>> {
+    try {
+      const token = await this.jwtService.signAsync(payload, option);
+      return { ok: true, data: { accessToken: token } };
+    } catch (error) {
+      return {
+        ok: false,
+        httpStatus: 500,
+        error: '토큰 발급 과정에서 에러가 발생했습니다.',
+      };
     }
   }
 }
