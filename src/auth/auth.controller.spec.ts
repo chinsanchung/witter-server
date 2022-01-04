@@ -118,4 +118,53 @@ describe('AuthController', () => {
       expect(result).toEqual('로그아웃을 완료했습니다.');
     });
   });
+
+  describe('createAccessToken', () => {
+    const mockUser = {
+      id: 1,
+      user_id: 'testid',
+      password: '12345',
+      created_at: new Date(),
+      hashPassword: jest.fn(),
+    };
+
+    it('실패 - 토큰 발급 과정에서 에러가 발생했습니다.', async () => {
+      const errorOutput = {
+        ok: false,
+        httpStatus: 500,
+        error: '토큰 발급 과정에서 에러가 발생했습니다.',
+      };
+      jest.spyOn(service, 'createToken').mockResolvedValue(errorOutput);
+
+      try {
+        const result = await controller.createAccessToken(mockUser);
+      } catch (error) {
+        expect(service.createToken).toHaveBeenCalledTimes(1);
+        expect(service.createToken).toHaveBeenCalledWith({
+          payload: { user_id: mockUser.user_id },
+          option: { expiresIn: '1h' },
+        });
+        expect(error.status).toBe(errorOutput.httpStatus);
+        expect(error.response).toBe(errorOutput.error);
+      }
+    });
+
+    it('성공 - 새로운 access token 을 발급합니다.', async () => {
+      const createTokenOutput = 'signed-token';
+
+      jest.spyOn(service, 'createToken').mockResolvedValue({
+        ok: true,
+        data: createTokenOutput,
+      });
+
+      const result = await controller.createAccessToken(mockUser);
+
+      expect(service.createToken).toHaveBeenCalledTimes(1);
+      expect(service.createToken).toHaveBeenCalledWith({
+        payload: { user_id: mockUser.user_id },
+        option: { expiresIn: '1h' },
+      });
+      expect(result).toEqual(createTokenOutput);
+    });
+  });
 });
