@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -12,7 +13,8 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly users: Repository<User>,
-    private jwtService: JwtService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async checkLoginValidtionAndReturnUser({
@@ -76,6 +78,17 @@ export class AuthService {
         httpStatus: 500,
         error: '로그인 과정에서 에러가 발생했습니다.',
       };
+    }
+  }
+
+  async verifyToken(token: string): Promise<IOutputWithData<any>> {
+    try {
+      const result = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get('JWT_SECRET'),
+      });
+      return { ok: true, data: result };
+    } catch (error) {
+      return { ok: false, error: 'INVALID_TOKEN' };
     }
   }
 }
