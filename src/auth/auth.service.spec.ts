@@ -12,6 +12,7 @@ const mockRepository = () => ({
 const mockJwtService = () => ({
   sign: jest.fn(() => 'signed-token'),
   verifyAsync: jest.fn(),
+  signAsync: jest.fn(),
 });
 const mockConfigService = () => ({
   get: jest.fn(() => 'secret-key'),
@@ -171,6 +172,47 @@ describe('AuthService', () => {
       expect(result).toEqual({
         ok: true,
         data: tokenPayload,
+      });
+    });
+  });
+
+  describe('createAccessToken', () => {
+    const createInput = {
+      payload: { user_id: 'testid' },
+      option: { expiresIn: '1h' },
+    };
+    it('실패 - 토큰 발급 과정에서 에러가 발생했습니다.', async () => {
+      jest.spyOn(jwtService, 'signAsync').mockRejectedValue(new Error());
+
+      const result = await service.createToken(createInput);
+
+      expect(jwtService.signAsync).toHaveBeenCalledTimes(1);
+      expect(jwtService.signAsync).toHaveBeenCalledWith(
+        createInput.payload,
+        createInput.option,
+      );
+
+      expect(result).toEqual({
+        ok: false,
+        httpStatus: 500,
+        error: '토큰 발급 과정에서 에러가 발생했습니다.',
+      });
+    });
+    it('성공 - 토큰 발급', async () => {
+      const mockToken = 'signed-token';
+      jest.spyOn(jwtService, 'signAsync').mockResolvedValue(mockToken);
+
+      const result = await service.createToken(createInput);
+
+      expect(jwtService.signAsync).toHaveBeenCalledTimes(1);
+      expect(jwtService.signAsync).toHaveBeenCalledWith(
+        createInput.payload,
+        createInput.option,
+      );
+
+      expect(result).toEqual({
+        ok: true,
+        data: mockToken,
       });
     });
   });
