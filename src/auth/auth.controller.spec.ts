@@ -150,7 +150,7 @@ describe('AuthController', () => {
     });
 
     it('성공 - 새로운 access token 을 발급합니다.', async () => {
-      const createTokenOutput = 'signed-token';
+      const createTokenOutput = { accessToken: 'signed-token' };
 
       jest.spyOn(service, 'createToken').mockResolvedValue({
         ok: true,
