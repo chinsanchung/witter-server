@@ -10,7 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { User } from 'src/entities/user.entity';
 import { AuthService } from './auth.service';
-import { UserId } from './decorators/user.decorator';
+import { UserParam } from './decorators/user.decorator';
 import { LoginInputDto } from './dtos/login.dto';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
 
@@ -47,20 +47,20 @@ export class AuthController {
 
   @Post('/logout')
   logout(@Res({ passthrough: true }) response: Response): string {
-    response.clearCookie('refresh-token');
+    response.clearCookie('REFRESH_TOKEN');
     return '로그아웃을 완료했습니다.';
   }
 
   @Post('/token')
   @UseGuards(RefreshTokenGuard)
-  async createAccessToken(@UserId() user: User) {
+  async createAccessToken(@UserParam() user: User) {
     const { ok, data, httpStatus, error } = await this.authService.createToken({
       payload: { user_id: user.user_id },
       option: { expiresIn: '1h' },
     });
 
     if (ok) {
-      return data;
+      return { accessToken: data };
     }
     throw new HttpException(error, httpStatus);
   }

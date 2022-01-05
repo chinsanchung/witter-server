@@ -4,6 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as httpMocks from 'node-mocks-http';
 import { User } from 'src/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
@@ -28,6 +29,7 @@ describe('AuthController', () => {
       controllers: [AuthController],
       providers: [
         AuthService,
+        UsersService,
         {
           provide: getRepositoryToken(User),
           useValue: mockRepository(),
@@ -137,7 +139,7 @@ describe('AuthController', () => {
       jest.spyOn(service, 'createToken').mockResolvedValue(errorOutput);
 
       try {
-        const result = await controller.createAccessToken(mockUser);
+        await controller.createAccessToken(mockUser);
       } catch (error) {
         expect(service.createToken).toHaveBeenCalledTimes(1);
         expect(service.createToken).toHaveBeenCalledWith({
@@ -154,7 +156,7 @@ describe('AuthController', () => {
 
       jest.spyOn(service, 'createToken').mockResolvedValue({
         ok: true,
-        data: createTokenOutput,
+        data: createTokenOutput.accessToken,
       });
 
       const result = await controller.createAccessToken(mockUser);

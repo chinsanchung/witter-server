@@ -14,7 +14,7 @@ export class RefreshTokenGuard extends AuthGuard('jwt') {
     super();
   }
 
-  async canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
     const cookiesStringFromHeader = request.headers?.cookie;
     const cookiesObject = getCookies(cookiesStringFromHeader);
