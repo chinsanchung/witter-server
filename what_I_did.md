@@ -4,6 +4,7 @@
 
 - [로그인](##로그인)
 - [로그아웃](##로그아웃)
+- [Authorization: 로그인 인증](##Authorization)
 
 ---
 
@@ -73,7 +74,73 @@ it('성공 - 토큰 발급', async () => {
 ```typescript
 @Post('/logout')
 logout(@Res({ passthrough: true }) response: Response): string {
-  response.clearCookie('refresh-token');
+  response.clearCookie('REFRESH_TOKEN');
   return '로그아웃을 완료했습니다.';
 }
 ```
+
+## Authorization
+
+### passport 로 유저 인증하기
+
+passport, passport-jwt, @nestjs/passport 를 이용해 유저의 인증을 수행했습니다. jwt 전략과 가드 제작, 그리고 가드에 서비스 의존성을 주입하는 등 인증 과정을 편리하게 도와줘 개발 시간을 절약할 수 있었기 때문입니다.
+
+### 유저를 검증하는 과정
+
+로그인을 할 때 액세스 토큰과 리프레시 토큰을 발급했는데, 이것을 이용해 유저를 검증합니다.
+
+- [AccessTokenGuard](https://github.com/chinsanchung/witter-server/blob/2.0/develop/src/auth/guards/access-token.guard.ts): 회원 인증에서 주로 사용하는 가드입니다.
+  - 액세스 토큰과 리프레시 토큰이 없을 경우 "로그인이 필요한 기능입니다." 에러를 띄웁니다.
+  - 액세스 토큰을 검증한 후, 성공했으면 유저의 정보를 Request 객체에 담고 통과를, 실패하면 "NEED_REFRESH_TOKEN"이라는 에러를 띄웁니다.
+  - 클라이언트 측에서 "NEED_REFRESH_TOKEN" 에러 메시지를 확인하면, 그 즉시 리프레시 토큰으로 액세스 토큰을 재발급하는 절차를 진행합니다.
+- [RefreshTokenGuard](https://github.com/chinsanchung/witter-server/blob/2.0/develop/src/auth/guards/refresh-token.guard.ts): 액세스 토큰을 재발급하는 `POST /auth/token` API 에서 사용하는 가드입니다.
+  - 리프레시 토큰이 존재하지 않으면 "로그인이 필요한 기능입니다." 에러를 띄웁니다.
+  - 토큰이 존재하면 그것을 검증하여 true 일 경우 가드를 통과합니다. 이후 [authController](https://github.com/chinsanchung/witter-server/blob/2.0/develop/src/auth/auth.controller.ts) 의 `createAuthToken` 메소드에서 새로운 액세스 토큰을 발급하여 응답으로 보냅니다.
+  - 토큰이 유효하지 않으면 "리프레시 토큰이 유효하지 않습니다."라는 에러를 띄웁니다.
+
+### 커스텀 가드
+
+이전에는 하나의 토큰만을 사용했기에 passport 에서의 기본 가드를 사용했지만, 이번에는 액세스 토큰과 리프레시 토큰 둘을 활용하기 떄문에 직접 가드를 만들었습니다. 다음은 AccessTokenGuard 의 코드를 불러온 것입니다.
+
+```typescript
+export class AccessTokenGuard extends AuthGuard('jwt') {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
+  ) {
+    super();
+  }
+  async canActivate(context: ExecutionContext) {
+    const request: Request = context.switchToHttp().getRequest();
+    const accessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(request);
+    const cookiesStringFromHeader = request.headers?.cookie;
+    const cookiesObject = getCookies(cookiesStringFromHeader);
+
+    if (!accessToken && !cookiesObject['REFRESH_TOKEN']) {
+      throw new HttpException('로그인이 필요한 기능입니다.', 401);
+    }
+
+    const checkAccessTokenValidation = await this.authService.verifyToken(
+      accessToken,
+    );
+    if (checkAccessTokenValidation.ok) {
+      const { ok, data, httpStatus, error } =
+        await this.usersService.findOneByUserId(
+          checkAccessTokenValidation.data.user_id,
+        );
+      if (ok) {
+        request['user'] = data;
+        return true;
+      }
+      throw new HttpException(error, httpStatus);
+    }
+    throw new HttpException('NEED_REFRESH_TOKEN', 401);
+  }
+}
+```
+
+- 모든 가드는 `catActivate()` 함수를 구현해아 하며, true 또는 false 값을 리턴하여 요청을 처리하거나 거절합니다.
+- `context.switchToHttp().getRequest()`으로 Request 객체를 불러옵니다.
+- passport-jwt 의 `ExtractJwt`, `fromAuthHeaderAsBearerToken`으로 헤더로부터 액세스 토큰을 불러옵니다.
+- [getCookies](https://github.com/chinsanchung/witter-server/blob/2.0/develop/src/auth/util/get-cookies.ts) 함수는 [stack overflow](https://stackoverflow.com/a/51812642)로부터 얻은 코드로, Request 객체로부터 쿠키를 찾아 객체로 만들어주는 역할을 수행합니다.
+- 토큰의 유무, 액세스 토큰의 유효성을 검증하여 API 를 수행하거나 401 에러를 띄웁니다.
