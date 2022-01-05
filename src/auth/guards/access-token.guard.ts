@@ -14,7 +14,7 @@ export class AccessTokenGuard extends AuthGuard('jwt') {
   ) {
     super();
   }
-  async canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
     const accessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(request);
     const cookiesStringFromHeader = request.headers?.cookie;
