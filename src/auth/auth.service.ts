@@ -60,19 +60,32 @@ export class AuthService {
         return { ok: false, httpStatus, error };
       }
 
-      const accessToken = this.jwtService.sign(
-        { user_id: data.user_id },
-        {
+      const accessTokenResponse = await this.createToken({
+        payload: { user_id: data.user_id },
+        option: {
           expiresIn: '1h',
         },
-      );
-      const refreshToken = this.jwtService.sign(
-        { user_id: data.user_id },
-        {
+      });
+      const refreshTokenResponse = await this.createToken({
+        payload: { user_id: data.user_id },
+        option: {
           expiresIn: '7d',
         },
-      );
-      return { ok: true, data: { accessToken, refreshToken } };
+      });
+      if (!accessTokenResponse.ok || !refreshTokenResponse.ok) {
+        return {
+          ok: false,
+          httpStatus: 500,
+          error: '토큰을 발급하는 과정에서 에러가 발생했습니다.',
+        };
+      }
+      return {
+        ok: true,
+        data: {
+          accessToken: accessTokenResponse.data,
+          refreshToken: refreshTokenResponse.data,
+        },
+      };
     } catch (error) {
       return {
         ok: false,
@@ -96,10 +109,10 @@ export class AuthService {
   async createToken({
     payload,
     option,
-  }: CreateTokenInputDto): Promise<IOutputWithData<{ accessToken: string }>> {
+  }: CreateTokenInputDto): Promise<IOutputWithData<string>> {
     try {
       const token = await this.jwtService.signAsync(payload, option);
-      return { ok: true, data: { accessToken: token } };
+      return { ok: true, data: token };
     } catch (error) {
       return {
         ok: false,
