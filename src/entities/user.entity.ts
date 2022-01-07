@@ -8,7 +8,13 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException } from '@nestjs/common';
-import { IsOptional, IsString, Length, MaxLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsOptional,
+  IsString,
+  Length,
+  MaxLength,
+} from 'class-validator';
 
 @Entity()
 export class User {
@@ -33,6 +39,10 @@ export class User {
 
   @CreateDateColumn({ type: 'datetime' })
   created_at: Date;
+
+  @Column({ default: true })
+  @IsBoolean()
+  activate?: boolean;
 
   @BeforeInsert()
   @BeforeUpdate()

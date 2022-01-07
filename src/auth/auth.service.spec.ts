@@ -60,6 +60,7 @@ describe('AuthService', () => {
       ...loginInput,
       id: 1,
       created_at: new Date(),
+      activate: true,
       hashPassword: jest.fn(),
     };
 

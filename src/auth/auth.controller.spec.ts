@@ -127,6 +127,7 @@ describe('AuthController', () => {
       user_id: 'testid',
       password: '12345',
       created_at: new Date(),
+      activate: true,
       hashPassword: jest.fn(),
     };
 
