@@ -63,40 +63,67 @@ describe('UsersController', () => {
     });
   });
 
-  describe('edit user', () => {
+  describe('editUser', () => {
+    const mockUser = {
+      id: 1,
+      user_id: 'testid',
+      password: '12345',
+      created_at: new Date(),
+      activate: true,
+      hashPassword: jest.fn(),
+    };
     it('실패 - Internal Server Error', async () => {
-      jest.spyOn(service, 'editUser').mockResolvedValue({
+      const errorOutput = {
         ok: false,
         httpStatus: 500,
         error: '회원 정보를 갱신하는 과정에서 에러가 발생했습니다.',
-      });
+      };
+      jest.spyOn(service, 'editUser').mockResolvedValue(errorOutput);
 
-      const result = await controller.editUser({ description: 'edited' });
+      try {
+        await controller.editUser(mockUser, {
+          description: 'error result',
+        });
+      } catch (error) {
+        expect(error.status).toBe(errorOutput.httpStatus);
+        expect(error.response).toEqual(errorOutput.error);
+      }
     });
     it('성공 - 프로필 수정', async () => {
       const editInput = { description: 'edited' };
+      const message = '프로필을 수정했습니다.';
 
-      jest.spyOn(service, 'editUser').mockResolvedValue({ ok: true });
+      jest
+        .spyOn(service, 'editUser')
+        .mockResolvedValue({ ok: true, data: message });
 
-      const result = await controller.editUser(editInput);
+      const result = await controller.editUser(mockUser, editInput);
 
-      expect(result).toEqual({ message: '프로필을 수정했습니다.' });
+      expect(result).toEqual({ message });
     });
     it('성공 - 비밀번호 수정', async () => {
       const editInput = { password: '54321' };
+      const message = '비밀번호를 변경했습니다.';
 
-      jest.spyOn(service, 'editUser').mockResolvedValue({ ok: true });
+      jest
+        .spyOn(service, 'editUser')
+        .mockResolvedValue({ ok: true, data: message });
 
-      const result = await controller.editUser(editInput);
+      const result = await controller.editUser(mockUser, editInput);
 
-      expect(result).toEqual({ message: '비밀번호를 변경했습니다.' });
+      expect(result).toEqual({ message });
     });
     it('성공 - 회원 탈퇴', async () => {
-      jest.spyOn(service, 'editUser').mockResolvedValue({ ok: true });
+      const editInput = { activate: false };
+      const message = '계정을 탈퇴했습니다.';
 
-      const result = await controller.editUser({ activate: false });
+      jest
+        .spyOn(service, 'editUser')
+        .mockResolvedValue({ ok: true, data: message });
 
-      expect(result).toEqual({ message: '계정을 탈퇴했습니다.' });
+      const result = await controller.editUser(mockUser, editInput);
+
+      expect(result).toEqual({ message });
     });
   });
 });

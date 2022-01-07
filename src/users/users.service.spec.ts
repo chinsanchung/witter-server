@@ -64,7 +64,7 @@ describe('UsersService', () => {
     });
   });
 
-  describe('edit user', () => {
+  describe('editUser', () => {
     const mockUser = {
       id: 1,
       user_id: 'testid',
@@ -83,7 +83,10 @@ describe('UsersService', () => {
 
       usersRepository.save.mockRejectedValue(new Error());
 
-      const result = await service.editUser(editInput);
+      const result = await service.editUser({
+        user: mockUser,
+        payload: editInput,
+      });
 
       expect(usersRepository.save).toHaveBeenCalledTimes(1);
       expect(usersRepository.save).toHaveBeenCalledWith(editedMockUser);
@@ -102,11 +105,14 @@ describe('UsersService', () => {
 
       usersRepository.save.mockResolvedValue(editedMockUser);
 
-      const result = await service.editUser(editInput);
+      const result = await service.editUser({
+        user: mockUser,
+        payload: editInput,
+      });
 
       expect(usersRepository.save).toHaveBeenCalledTimes(1);
       expect(usersRepository.save).toHaveBeenCalledWith(editedMockUser);
-      expect(result).toEqual({ ok: true });
+      expect(result).toEqual({ ok: true, data: '프로필을 수정했습니다.' });
     });
     it('성공 - 비밀번호 수정', async () => {
       const editInput = { password: '54321' };
@@ -117,25 +123,32 @@ describe('UsersService', () => {
 
       usersRepository.save.mockResolvedValue(editedMockUser);
 
-      const result = await service.editUser(editInput);
+      const result = await service.editUser({
+        user: mockUser,
+        payload: editInput,
+      });
 
       expect(usersRepository.save).toHaveBeenCalledTimes(1);
       expect(usersRepository.save).toHaveBeenCalledWith(editedMockUser);
-      expect(result).toEqual({ ok: true });
+      expect(result).toEqual({ ok: true, data: '비밀번호를 변경했습니다.' });
     });
     it('성공 - 회원 탈퇴', async () => {
+      const editInput = { activate: false };
       const editedMockUser = {
         ...mockUser,
-        activate: false,
+        activate: editInput.activate,
       };
 
       usersRepository.save.mockResolvedValue(editedMockUser);
 
-      const result = await service.editUser(editInput);
+      const result = await service.editUser({
+        user: mockUser,
+        payload: editInput,
+      });
 
       expect(usersRepository.save).toHaveBeenCalledTimes(1);
       expect(usersRepository.save).toHaveBeenCalledWith(editedMockUser);
-      expect(result).toEqual({ ok: true });
+      expect(result).toEqual({ ok: true, data: '계정을 탈퇴했습니다.' });
     });
   });
 });
