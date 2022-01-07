@@ -63,4 +63,92 @@ describe('UsersService', () => {
       expect(result).toEqual({ ok: true });
     });
   });
+
+  describe('editUser', () => {
+    const mockUser = {
+      id: 1,
+      user_id: 'testid',
+      password: '12345',
+      description: 'default',
+      activate: true,
+      created_at: new Date(),
+      hashPassword: jest.fn(),
+    };
+    it('실패 - Internal Server Error', async () => {
+      const editInput = { description: 'edited' };
+      const editedMockUser = {
+        ...mockUser,
+        description: editInput.description,
+      };
+
+      usersRepository.save.mockRejectedValue(new Error());
+
+      const result = await service.editUser({
+        user: mockUser,
+        payload: editInput,
+      });
+
+      expect(usersRepository.save).toHaveBeenCalledTimes(1);
+      expect(usersRepository.save).toHaveBeenCalledWith(editedMockUser);
+      expect(result).toEqual({
+        ok: false,
+        httpStatus: 500,
+        error: '회원 정보를 갱신하는 과정에서 에러가 발생했습니다.',
+      });
+    });
+    it('성공 - 프로필 수정', async () => {
+      const editInput = { description: 'edited' };
+      const editedMockUser = {
+        ...mockUser,
+        description: editInput.description,
+      };
+
+      usersRepository.save.mockResolvedValue(editedMockUser);
+
+      const result = await service.editUser({
+        user: mockUser,
+        payload: editInput,
+      });
+
+      expect(usersRepository.save).toHaveBeenCalledTimes(1);
+      expect(usersRepository.save).toHaveBeenCalledWith(editedMockUser);
+      expect(result).toEqual({ ok: true, data: '프로필을 수정했습니다.' });
+    });
+    it('성공 - 비밀번호 수정', async () => {
+      const editInput = { password: '54321' };
+      const editedMockUser = {
+        ...mockUser,
+        password: editInput.password,
+      };
+
+      usersRepository.save.mockResolvedValue(editedMockUser);
+
+      const result = await service.editUser({
+        user: mockUser,
+        payload: editInput,
+      });
+
+      expect(usersRepository.save).toHaveBeenCalledTimes(1);
+      expect(usersRepository.save).toHaveBeenCalledWith(editedMockUser);
+      expect(result).toEqual({ ok: true, data: '비밀번호를 변경했습니다.' });
+    });
+    it('성공 - 회원 탈퇴', async () => {
+      const editInput = { activate: false };
+      const editedMockUser = {
+        ...mockUser,
+        activate: editInput.activate,
+      };
+
+      usersRepository.save.mockResolvedValue(editedMockUser);
+
+      const result = await service.editUser({
+        user: mockUser,
+        payload: editInput,
+      });
+
+      expect(usersRepository.save).toHaveBeenCalledTimes(1);
+      expect(usersRepository.save).toHaveBeenCalledWith(editedMockUser);
+      expect(result).toEqual({ ok: true, data: '계정을 탈퇴했습니다.' });
+    });
+  });
 });

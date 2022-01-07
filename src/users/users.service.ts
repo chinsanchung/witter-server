@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from 'src/entities/user.entity';
 import { IOutput, IOutputWithData } from 'src/common/output.interface';
 import { CreateUserInput } from './dtos/create-user.dto';
+import { EditUserInputDto } from './dtos/edit-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -43,6 +44,41 @@ export class UsersService {
       return { ok: true, data: user };
     } catch (error) {
       return { ok: false, httpStatus: 400, error: '유저가 존재하지 않습니다.' };
+    }
+  }
+
+  async editUser({
+    user,
+    payload,
+  }: {
+    user: User;
+    payload: EditUserInputDto;
+  }): Promise<IOutputWithData<string>> {
+    try {
+      const { description, password } = payload;
+      let message = '';
+      if (description) {
+        user.description = description;
+        message = '프로필을 수정했습니다.';
+      }
+      if (password) {
+        user.password = password;
+        message = '비밀번호를 변경했습니다.';
+      }
+      if (Object.prototype.hasOwnProperty.call(payload, 'activate')) {
+        user.activate = false;
+        message = '계정을 탈퇴했습니다.';
+      }
+
+      await this.users.save(user);
+
+      return { ok: true, data: message };
+    } catch (error) {
+      return {
+        ok: false,
+        httpStatus: 500,
+        error: '회원 정보를 갱신하는 과정에서 에러가 발생했습니다.',
+      };
     }
   }
 }
