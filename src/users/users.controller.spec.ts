@@ -62,4 +62,41 @@ describe('UsersController', () => {
       expect(result).toBe(message);
     });
   });
+
+  describe('edit user', () => {
+    it('실패 - Internal Server Error', async () => {
+      jest.spyOn(service, 'editUser').mockResolvedValue({
+        ok: false,
+        httpStatus: 500,
+        error: '회원 정보를 갱신하는 과정에서 에러가 발생했습니다.',
+      });
+
+      const result = await controller.editUser({ description: 'edited' });
+    });
+    it('성공 - 프로필 수정', async () => {
+      const editInput = { description: 'edited' };
+
+      jest.spyOn(service, 'editUser').mockResolvedValue({ ok: true });
+
+      const result = await controller.editUser(editInput);
+
+      expect(result).toEqual({ message: '프로필을 수정했습니다.' });
+    });
+    it('성공 - 비밀번호 수정', async () => {
+      const editInput = { password: '54321' };
+
+      jest.spyOn(service, 'editUser').mockResolvedValue({ ok: true });
+
+      const result = await controller.editUser(editInput);
+
+      expect(result).toEqual({ message: '비밀번호를 변경했습니다.' });
+    });
+    it('성공 - 회원 탈퇴', async () => {
+      jest.spyOn(service, 'editUser').mockResolvedValue({ ok: true });
+
+      const result = await controller.editUser({ activate: false });
+
+      expect(result).toEqual({ message: '계정을 탈퇴했습니다.' });
+    });
+  });
 });
