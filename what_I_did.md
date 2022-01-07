@@ -5,6 +5,7 @@
 - [로그인](##로그인)
 - [로그아웃](##로그아웃)
 - [Authorization: 로그인 인증](##Authorization)
+- [유저의 정보를 수정하기](##유저의-정보를-수정하기)
 
 ---
 
@@ -144,3 +145,7 @@ export class AccessTokenGuard extends AuthGuard('jwt') {
 - passport-jwt 의 `ExtractJwt`, `fromAuthHeaderAsBearerToken`으로 헤더로부터 액세스 토큰을 불러옵니다.
 - [getCookies](https://github.com/chinsanchung/witter-server/blob/2.0/develop/src/auth/util/get-cookies.ts) 함수는 [stack overflow](https://stackoverflow.com/a/51812642)로부터 얻은 코드로, Request 객체로부터 쿠키를 찾아 객체로 만들어주는 역할을 수행합니다.
 - 토큰의 유무, 액세스 토큰의 유효성을 검증하여 API 를 수행하거나 401 에러를 띄웁니다.
+
+## 유저의 정보를 수정하기
+
+엑세스 토큰으로부터 얻은 정보(로그인한 유저의 데이터)를 이용해서 유저의 프로필, 비밀번호를 수정하고, 회원을 탈퇴하는 기능을 구현했습니다.
