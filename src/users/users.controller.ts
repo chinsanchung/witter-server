@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   HttpException,
   Patch,
   Post,
@@ -38,6 +39,20 @@ export class UsersController {
     const { ok, data, httpStatus, error } = await this.usersService.editUser({
       user,
       payload,
+    });
+
+    if (ok) {
+      return { message: data };
+    }
+    throw new HttpException(error, httpStatus);
+  }
+
+  @Delete()
+  @UseGuards(AccessTokenGuard)
+  async deleteUser(@UserParam() user: User): Promise<{ message: string }> {
+    const { ok, data, httpStatus, error } = await this.usersService.editUser({
+      user,
+      payload: { activate: false },
     });
 
     if (ok) {

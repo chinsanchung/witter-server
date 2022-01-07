@@ -113,6 +113,17 @@ describe('UsersController', () => {
 
       expect(result).toEqual({ message });
     });
+  });
+
+  describe('deleteUser', () => {
+    const mockUser = {
+      id: 1,
+      user_id: 'testid',
+      password: '12345',
+      created_at: new Date(),
+      activate: true,
+      hashPassword: jest.fn(),
+    };
     it('성공 - 회원 탈퇴', async () => {
       const editInput = { activate: false };
       const message = '계정을 탈퇴했습니다.';
