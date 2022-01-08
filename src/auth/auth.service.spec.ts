@@ -55,27 +55,18 @@ describe('AuthService', () => {
 
   describe('login', () => {
     const loginInput = { user_id: 'testid', password: '12345' };
-    const defaultErrorOutput = { ok: false, httpStatus: 400 };
-    const mockUser = {
-      ...loginInput,
-      id: 1,
-      created_at: new Date(),
-      activate: true,
-      hashPassword: jest.fn(),
-    };
+    const badRequestErrorOutput = { ok: false, httpStatus: 400 };
+    const mockUser = { ...loginInput, activate: true };
 
     it('실패 - 아이디가 일치하지 않는 경우', async () => {
       const errorOutput = {
-        ...defaultErrorOutput,
+        ...badRequestErrorOutput,
         error: '존재하지 않는 계정입니다.',
       };
       usersRepository.findOne.mockResolvedValue(null);
       jest
         .spyOn(service, 'checkLoginValidtionAndReturnUser')
-        .mockResolvedValue({
-          ...defaultErrorOutput,
-          error: errorOutput.error,
-        });
+        .mockResolvedValue(errorOutput);
 
       const result = await service.login(loginInput);
 
@@ -87,18 +78,39 @@ describe('AuthService', () => {
     });
 
     it('실패 - 비밀번호가 일치하지 않는 경우', async () => {
-      const mockUser = { id: 1, user_id: 'testid', password: '54321' };
       const errorOutput = {
-        ...defaultErrorOutput,
+        ...badRequestErrorOutput,
         error: '비밀번호가 일치하지 않습니다.',
       };
-      usersRepository.findOne.mockResolvedValue(mockUser);
+      usersRepository.findOne.mockResolvedValue({
+        ...mockUser,
+        password: '54321',
+      });
       jest
         .spyOn(service, 'checkLoginValidtionAndReturnUser')
-        .mockResolvedValue({
-          ...defaultErrorOutput,
-          error: errorOutput.error,
-        });
+        .mockResolvedValue(errorOutput);
+
+      const result = await service.login(loginInput);
+
+      expect(service.checkLoginValidtionAndReturnUser).toHaveBeenCalledTimes(1);
+      expect(service.checkLoginValidtionAndReturnUser).toHaveBeenCalledWith(
+        loginInput,
+      );
+      expect(result).toEqual(errorOutput);
+    });
+
+    it('실패 - 탈퇴한 계정으로 로그인한 경우', async () => {
+      const errorOutput = {
+        ...badRequestErrorOutput,
+        error: '탈퇴한 계정으로 로그인하실 수 없습니다.',
+      };
+      usersRepository.findOne.mockResolvedValue({
+        ...mockUser,
+        activate: false,
+      });
+      jest
+        .spyOn(service, 'checkLoginValidtionAndReturnUser')
+        .mockResolvedValue(errorOutput);
 
       const result = await service.login(loginInput);
 
@@ -115,6 +127,7 @@ describe('AuthService', () => {
         httpStatus: 500,
         error: '토큰을 발급하는 과정에서 에러가 발생했습니다.',
       };
+      usersRepository.findOne.mockResolvedValue(mockUser);
       jest
         .spyOn(service, 'checkLoginValidtionAndReturnUser')
         .mockResolvedValue({

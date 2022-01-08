@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import * as httpMocks from 'node-mocks-http';
 import { User } from 'src/entities/user.entity';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
@@ -7,6 +8,8 @@ import { UsersService } from './users.service';
 const mockRepository = () => ({
   createUser: jest.fn(),
 });
+
+const mockResponse = httpMocks.createResponse();
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -125,14 +128,13 @@ describe('UsersController', () => {
       hashPassword: jest.fn(),
     };
     it('성공 - 회원 탈퇴', async () => {
-      const editInput = { activate: false };
       const message = '계정을 탈퇴했습니다.';
 
       jest
         .spyOn(service, 'editUser')
         .mockResolvedValue({ ok: true, data: message });
 
-      const result = await controller.editUser(mockUser, editInput);
+      const result = await controller.deleteUser(mockResponse, mockUser);
 
       expect(result).toEqual({ message });
     });

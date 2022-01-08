@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { IOutputWithData } from 'src/common/output.interface';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
+import { CheckLoginValidationDto } from './dtos/check-login-validation.dto';
 import { CreateTokenInputDto } from './dtos/create-token.dto';
 import { LoginInputDto, LoginOutputDto } from './dtos/login.dto';
 
@@ -21,14 +22,24 @@ export class AuthService {
   async checkLoginValidtionAndReturnUser({
     user_id,
     password,
-  }: LoginInputDto): Promise<IOutputWithData<User>> {
+  }: LoginInputDto): Promise<IOutputWithData<CheckLoginValidationDto>> {
     try {
-      const user = await this.users.findOne({ user_id });
+      const user = await this.users.findOne(
+        { user_id },
+        { select: ['user_id', 'password', 'activate'] },
+      );
       if (!user) {
         return {
           ok: false,
           httpStatus: 400,
           error: '존재하지 않는 계정입니다.',
+        };
+      }
+      if (!user.activate) {
+        return {
+          ok: false,
+          httpStatus: 400,
+          error: '탈퇴한 계정으로 로그인하실 수 없습니다.',
         };
       }
       const isCorrectPassword = await bcrypt.compare(password, user.password);

@@ -56,44 +56,89 @@ describe('AuthController', () => {
 
   describe('login', () => {
     const loginInput = { user_id: 'testid', password: '12345' };
-    const defaultErrorOutput = { ok: false, httpStatus: 400 };
+    const badRequestErrorOutput = { ok: false, httpStatus: 400 };
+    const mockUser = { ...loginInput, activate: true };
 
     it('실패 - 아이디가 일치하지 않는 경우', async () => {
       const errorOutput = {
-        ...defaultErrorOutput,
+        ...badRequestErrorOutput,
         error: '존재하지 않는 계정입니다.',
       };
       jest
         .spyOn(service, 'checkLoginValidtionAndReturnUser')
-        .mockResolvedValue({ ok: false, error: errorOutput.error });
+        .mockResolvedValue(errorOutput);
       jest.spyOn(service, 'login').mockResolvedValue(errorOutput);
 
       try {
         await controller.login(mockResponse, loginInput);
       } catch (e) {
-        expect(e.status).toBe(400);
+        expect(e.status).toBe(errorOutput.httpStatus);
         expect(e.response).toBe(errorOutput.error);
       }
     });
+
     it('실패 - 비밀번호가 일치하지 않는 경우', async () => {
       const errorOutput = {
-        ...defaultErrorOutput,
+        ...badRequestErrorOutput,
         error: '비밀번호가 일치하지 않습니다.',
       };
 
       jest
         .spyOn(service, 'checkLoginValidtionAndReturnUser')
-        .mockResolvedValue({ ok: false, error: errorOutput.error });
+        .mockResolvedValue(errorOutput);
 
       jest.spyOn(service, 'login').mockResolvedValue(errorOutput);
 
       try {
         await controller.login(mockResponse, loginInput);
       } catch (e) {
-        expect(e.status).toBe(400);
+        expect(e.status).toBe(errorOutput.httpStatus);
         expect(e.response).toBe(errorOutput.error);
       }
     });
+
+    it('실패 - 탈퇴한 계정으로 로그인한 경우', async () => {
+      const errorOutput = {
+        ...badRequestErrorOutput,
+        error: '탈퇴한 계정으로 로그인하실 수 없습니다.',
+      };
+
+      jest
+        .spyOn(service, 'checkLoginValidtionAndReturnUser')
+        .mockResolvedValue(errorOutput);
+
+      jest.spyOn(service, 'login').mockResolvedValue(errorOutput);
+
+      try {
+        await controller.login(mockResponse, loginInput);
+      } catch (e) {
+        expect(e.status).toBe(errorOutput.httpStatus);
+        expect(e.response).toBe(errorOutput.error);
+      }
+    });
+
+    it('실패 - 토큰 발급 과정에서 에러가 발생', async () => {
+      const errorOutput = {
+        ok: false,
+        httpStatus: 500,
+        error: '토큰을 발급하는 과정에서 에러가 발생했습니다.',
+      };
+      jest
+        .spyOn(service, 'checkLoginValidtionAndReturnUser')
+        .mockResolvedValue({
+          ok: true,
+          data: mockUser,
+        });
+      jest.spyOn(service, 'login').mockResolvedValue(errorOutput);
+
+      try {
+        await controller.login(mockResponse, loginInput);
+      } catch (e) {
+        expect(e.status).toBe(errorOutput.httpStatus);
+        expect(e.response).toBe(errorOutput.error);
+      }
+    });
+
     it('성공 - 토큰 발급', async () => {
       const loginOutput = {
         accessToken: 'signed-token',
@@ -101,7 +146,10 @@ describe('AuthController', () => {
       };
       jest
         .spyOn(service, 'checkLoginValidtionAndReturnUser')
-        .mockResolvedValue({ ok: true });
+        .mockResolvedValue({
+          ok: true,
+          data: mockUser,
+        });
       jest.spyOn(service, 'login').mockResolvedValue({
         ok: true,
         data: loginOutput,
