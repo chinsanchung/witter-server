@@ -5,8 +5,10 @@ import {
   HttpException,
   Patch,
   Post,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { UserParam } from 'src/auth/decorators/user.decorator';
 import { AccessTokenGuard } from 'src/auth/guards/access-token.guard';
 import { User } from 'src/entities/user.entity';
@@ -49,13 +51,17 @@ export class UsersController {
 
   @Delete()
   @UseGuards(AccessTokenGuard)
-  async deleteUser(@UserParam() user: User): Promise<{ message: string }> {
+  async deleteUser(
+    @Res({ passthrough: true }) response: Response,
+    @UserParam() user: User,
+  ): Promise<{ message: string }> {
     const { ok, data, httpStatus, error } = await this.usersService.editUser({
       user,
       payload: { activate: false },
     });
 
     if (ok) {
+      response.clearCookie('REFRESH_TOKEN');
       return { message: data };
     }
     throw new HttpException(error, httpStatus);
