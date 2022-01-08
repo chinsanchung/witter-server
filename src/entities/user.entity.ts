@@ -26,7 +26,7 @@ export class User {
   @Length(5, 12, { message: 'user_id: 5 ~ 12 글자로 입력해주세요.' })
   user_id: string;
 
-  @Column()
+  @Column({ select: false })
   @IsString()
   @Length(5, 20, { message: 'password: 5 ~ 20 글자를 입력해주세요.' })
   password: string;
