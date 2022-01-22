@@ -1,10 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Tweet } from 'src/entities/tweet.entity';
+import { User } from 'src/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 import { TweetsController } from './tweets.controller';
 import { TweetsService } from './tweets.service';
 
 const mockRepository = () => ({
+  findOne: jest.fn(),
   save: jest.fn(),
   create: jest.fn(),
 });
@@ -18,8 +21,13 @@ describe('TweetsController', () => {
       controllers: [TweetsController],
       providers: [
         TweetsService,
+        UsersService,
         {
           provide: getRepositoryToken(Tweet),
+          useValue: mockRepository(),
+        },
+        {
+          provide: getRepositoryToken(User),
           useValue: mockRepository(),
         },
       ],
@@ -45,15 +53,23 @@ describe('TweetsController', () => {
         hashPassword: jest.fn(),
       };
       const createTweetInput = {
-        content: 'test content',
+        contents: 'test content',
       };
-      const message = '트윗을 작성했습니다.';
+      const newTweet = {
+        id: 1,
+        contents: createTweetInput.contents,
+        created_at: new Date(),
+        activate: true,
+        user: mockUser,
+      };
 
-      jest.spyOn(service, 'createTweet').mockResolvedValue({ ok: true });
+      jest
+        .spyOn(service, 'createTweet')
+        .mockResolvedValue({ ok: true, data: newTweet });
 
       const result = await controller.createTweet(mockUser, createTweetInput);
 
-      expect(result).toEqual({ message });
+      expect(result).toEqual({ data: newTweet });
     });
   });
 });
