@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -15,6 +16,7 @@ import {
   Length,
   MaxLength,
 } from 'class-validator';
+import { Tweet } from './tweet.entity';
 
 @Entity()
 export class User {
@@ -37,12 +39,15 @@ export class User {
   @IsOptional()
   description?: string;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ type: 'datetime', select: false })
   created_at: Date;
 
   @Column({ default: true })
   @IsBoolean()
   activate?: boolean;
+
+  @ManyToOne((type) => Tweet, (tweet) => tweet.user)
+  tweets?: Tweet[];
 
   @BeforeInsert()
   @BeforeUpdate()
