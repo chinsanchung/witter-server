@@ -46,28 +46,30 @@ describe('TweetsService', () => {
     };
     it('성공: 트윗 생성', async () => {
       const createTweetInput = {
-        content: 'test content',
+        contents: 'test content',
       };
       const newTweet = {
         id: 1,
-        content: createTweetInput.content,
+        contents: createTweetInput.contents,
         created_at: new Date(),
         activate: true,
-        user: mockUser,
       };
       tweetsRepository.create.mockReturnValue(newTweet);
       tweetsRepository.save.mockResolvedValue(newTweet);
 
       const result = await service.createTweet({
-        createTweetInput,
         user: mockUser,
+        payload: createTweetInput,
       });
 
       expect(tweetsRepository.create).toHaveBeenCalledTimes(1);
-      expect(tweetsRepository.create).toHaveBeenCalledWith(createTweetInput);
+      expect(tweetsRepository.create).toHaveBeenCalledWith({
+        user: mockUser,
+        contents: createTweetInput.contents,
+      });
       expect(tweetsRepository.save).toHaveBeenCalledTimes(1);
-      expect(tweetsRepository.save).toHaveBeenCalledWith(createTweetInput);
-      expect(result).toEqual({ ok: true });
+      expect(tweetsRepository.save).toHaveBeenCalledWith(newTweet);
+      expect(result).toEqual({ ok: true, data: newTweet });
     });
   });
 });
