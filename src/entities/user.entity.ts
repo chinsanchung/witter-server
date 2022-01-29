@@ -4,7 +4,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -46,7 +46,7 @@ export class User {
   @IsBoolean()
   activate?: boolean;
 
-  @ManyToOne((type) => Tweet, (tweet) => tweet.user)
+  @OneToMany((type) => Tweet, (tweet) => tweet.user, { eager: false })
   tweets?: Tweet[];
 
   @BeforeInsert()

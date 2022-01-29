@@ -2,7 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { IsBoolean, IsString, Length } from 'class-validator';
@@ -25,6 +25,6 @@ export class Tweet {
   @IsBoolean()
   activate?: boolean;
 
-  @OneToMany((type) => User, (user) => user.tweets, { eager: true })
+  @ManyToOne((type) => User, (user) => user.tweets, { eager: true })
   user: User;
 }
