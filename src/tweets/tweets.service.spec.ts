@@ -104,7 +104,6 @@ describe('TweetsService', () => {
       expect(tweetsRepository.findOneOrFail).toHaveBeenCalledTimes(1);
       expect(tweetsRepository.findOneOrFail).toHaveBeenCalledWith({
         id: tweetIdInput,
-        user: mockUser,
       });
       expect(result).toEqual({
         ...badRequestErrorOutput,
@@ -129,7 +128,6 @@ describe('TweetsService', () => {
       expect(tweetsRepository.findOneOrFail).toHaveBeenCalledTimes(1);
       expect(tweetsRepository.findOneOrFail).toHaveBeenCalledWith({
         id: tweetIdInput,
-        user: mockUser,
       });
       expect(result).toEqual({
         ...badRequestErrorOutput,
@@ -150,7 +148,6 @@ describe('TweetsService', () => {
       expect(tweetsRepository.findOneOrFail).toHaveBeenCalledTimes(1);
       expect(tweetsRepository.findOneOrFail).toHaveBeenCalledWith({
         id: tweetIdInput,
-        user: mockUser,
       });
       expect(tweetsRepository.save).toHaveBeenCalledTimes(1);
       expect(tweetsRepository.save).toHaveBeenCalledWith({
