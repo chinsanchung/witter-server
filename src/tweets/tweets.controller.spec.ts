@@ -72,4 +72,58 @@ describe('TweetsController', () => {
       expect(result).toEqual({ data: newTweet });
     });
   });
+
+  describe('deleteTweet', () => {
+    const badRequestErrorOutput = { ok: false, httpStatus: 400 };
+    const mockUser = {
+      id: 1,
+      user_id: 'testid',
+      password: '12345',
+      description: 'default',
+      activate: true,
+      created_at: new Date(),
+      hashPassword: jest.fn(),
+    };
+    const mockTweet = {
+      id: 1,
+      contents: 'test content',
+      created_at: new Date(),
+      activate: true,
+    };
+    const tweetIdInput = 1;
+
+    it('실패 - 존재하지 않는 트윗입니다.', async () => {
+      const errorOutput = {
+        ...badRequestErrorOutput,
+        error: '존재하지 않는 트윗입니다.',
+      };
+      jest.spyOn(service, 'deleteTweet').mockResolvedValue(errorOutput);
+      try {
+        await controller.deleteTweet(mockUser, tweetIdInput);
+      } catch (e) {
+        expect(e.status).toBe(errorOutput.httpStatus);
+        expect(e.response).toBe(errorOutput.error);
+      }
+    });
+    it('실패 - 트윗의 작성자가 아닙니다.', async () => {
+      const errorOutput = {
+        ...badRequestErrorOutput,
+        error: '트윗의 작성자가 아닙니다.',
+      };
+      jest.spyOn(service, 'deleteTweet').mockResolvedValue(errorOutput);
+      try {
+        await controller.deleteTweet(mockUser, tweetIdInput);
+      } catch (e) {
+        expect(e.status).toBe(errorOutput.httpStatus);
+        expect(e.response).toBe(errorOutput.error);
+      }
+    });
+    it('성공 - 트윗 삭제 성공', async () => {
+      jest.spyOn(service, 'deleteTweet').mockResolvedValue({ ok: true });
+
+      const result = await controller.deleteTweet(mockUser, tweetIdInput);
+
+      expect(result).toEqual({ message: '삭제를 완료했습니다.' });
+    });
+  });
 });
