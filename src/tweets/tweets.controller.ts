@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   HttpException,
+  Param,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -29,6 +31,23 @@ export class TweetsController {
 
     if (ok) {
       return { data };
+    }
+    throw new HttpException(error, httpStatus);
+  }
+
+  @Delete('/:tweetId')
+  @UseGuards(AccessTokenGuard)
+  async deleteTweet(
+    @UserParam() user: User,
+    @Param('tweetId') tweetId: number,
+  ) {
+    const { ok, httpStatus, error } = await this.tweetsService.deleteTweet({
+      user,
+      tweetId,
+    });
+
+    if (ok) {
+      return { message: '삭제를 완료했습니다.' };
     }
     throw new HttpException(error, httpStatus);
   }
